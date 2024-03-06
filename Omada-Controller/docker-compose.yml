@@ -5,7 +5,7 @@ version: "3"
 
 services:
   omada-controller:
-    image: mbentley/omada-controller:5.12
+    image: mbentley/omada-controller:5.13
     container_name: omada-controller
     restart: unless-stopped
     network_mode: host
