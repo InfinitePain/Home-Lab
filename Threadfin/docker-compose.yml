@@ -19,7 +19,7 @@ services:
       - ${dir_main_conf}:/home/threadfin/conf
 
   threadfin-streamlink:
-    image: fyb3roptik/threadfin-streamlink:1.0.24
+    image: threadfin-streamlink:1.0.24
     container_name: threadfin-streamlink
     restart: unless-stopped
     ports:
