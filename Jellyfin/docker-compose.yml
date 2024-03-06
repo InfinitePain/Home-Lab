@@ -1,0 +1,20 @@
+# Title: jellyfin
+# Description: Media server
+
+version: "3"
+
+services:
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:10.8.13
+    container_name: jellyfin
+    restart: unless-stopped
+    ports:
+      - 8096:8096
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+    volumes:
+      - "${dir_config}:/config"
+      - "${dir_cache}:/cache"
+      - "${dir_media}:/media/${dir_media}"
