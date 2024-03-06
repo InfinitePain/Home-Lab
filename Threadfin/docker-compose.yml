@@ -1,0 +1,33 @@
+# Title: threadfin-stack
+# Description: M3U Proxy for live TV and converter for HLS streams to MPEG-TS
+
+version: "3"
+
+services:
+  threadfin-main:
+    image: fyb3roptik/threadfin:latest
+    container_name: threadfin-main
+    restart: unless-stopped
+    ports:
+      - ${port_main}:${port_main}
+    environment:
+      TZ: ${TZ}
+      THREADFIN_PORT: ${port_main}
+      PUID: ${PUID}
+      PGID: ${PGID}
+    volumes:
+      - ${dir_main_conf}:/home/threadfin/conf
+
+  threadfin-streamlink:
+    image: fyb3roptik/threadfin-streamlink:latest
+    container_name: threadfin-streamlink
+    restart: unless-stopped
+    ports:
+      - ${port_streamlink}:${port_streamlink}
+    environment:
+      TZ: ${TZ}
+      THREADFIN_PORT: ${port_streamlink}
+      PUID: ${PUID}
+      PGID: ${PGID}
+    volumes:
+      - ${dir_streamlink_conf}:/home/threadfin/conf
