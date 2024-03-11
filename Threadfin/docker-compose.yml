@@ -4,30 +4,58 @@
 version: "3"
 
 services:
-  threadfin-main:
+  threadfin:
     image: fyb3roptik/threadfin:1.0.24
-    container_name: threadfin-main
+    container_name: threadfin
     restart: unless-stopped
+    networks:
+      - proxy
     ports:
-      - ${port_main}:${port_main}
+      - ${PORT_THREADFIN}:${PORT_THREADFIN}
     environment:
       TZ: ${TZ}
-      THREADFIN_PORT: ${port_main}
+      THREADFIN_PORT: ${PORT_THREADFIN}
       PUID: ${PUID}
       PGID: ${PGID}
     volumes:
-      - ${dir_main_conf}:/home/threadfin/conf
+      - ${DIR_THREADFIN_CONF}:/home/threadfin/conf
+    labels:
+      - "traefik.enable=true"
+      # router: threadfin
+      - "traefik.http.routers.threadfin.entrypoints=https"
+      - "traefik.http.routers.threadfin.rule=Host(`${DOMAIN_THREADFIN}`)"
+      - "traefik.http.routers.threadfin.middlewares=secured@file"
+      - "traefik.http.routers.threadfin.service=threadfin"
+      - "traefik.http.routers.threadfin.tls=true"
+      # service: threadfin
+      - "traefik.http.services.threadfin.loadbalancer.server.port=${PORT_THREADFIN}"
 
-  threadfin-streamlink:
-    image: threadfin-streamlink:1.0.24
-    container_name: threadfin-streamlink
+  tf-streamlink:
+    image: tf-streamlink:1.0.24
+    container_name: tf-streamlink
     restart: unless-stopped
+    networks:
+      - proxy
     ports:
-      - ${port_streamlink}:${port_streamlink}
+      - ${PORT_TF_STREAMLINK}:${PORT_TF_STREAMLINK}
     environment:
       TZ: ${TZ}
-      THREADFIN_PORT: ${port_streamlink}
+      THREADFIN_PORT: ${PORT_TF_STREAMLINK}
       PUID: ${PUID}
       PGID: ${PGID}
     volumes:
-      - ${dir_streamlink_conf}:/home/threadfin/conf
+      - ${DIR_TF_STREAMLINK_CONF}:/home/threadfin/conf
+    labels:
+      - "traefik.enable=true"
+      # router: tf-streamlink
+      - "traefik.http.routers.tf-streamlink.entrypoints=https"
+      - "traefik.http.routers.tf-streamlink.rule=Host(`${DOMAIN_TF_STREAMLINK}`)"
+      - "traefik.http.routers.tf-streamlink.middlewares=secured@file"
+      - "traefik.http.routers.tf-streamlink.service=tf-streamlink"
+      - "traefik.http.routers.tf-streamlink.tls=true"
+      # service: tf-streamlink
+      - "traefik.http.services.tf-streamlink.loadbalancer.server.port=${PORT_TF_STREAMLINK}"
+
+networks:
+  proxy:
+    external: true

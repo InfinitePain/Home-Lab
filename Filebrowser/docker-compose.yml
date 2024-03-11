@@ -1,0 +1,23 @@
+# Title: Filebrowser
+# Description: Web-based file manager
+
+version: '3'
+
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:v2
+    container_name: filebrowser
+    restart: unless-stopped
+    user: ${PUID}:${PGID}
+    networks:
+      - proxy
+    ports:
+      - 8080:80
+    volumes:
+      - ${DIR_SRV}:/srv
+      - ${FILE_DB}:/database.db
+      - ${FILE_CONFIG}:/.filebrowser.json
+
+networks:
+  proxy:
+    external: true

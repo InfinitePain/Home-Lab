@@ -1,0 +1,41 @@
+# Title: Pi-hole
+# Description: Pi-hole DNS and DHCP Server
+
+version: '3'
+
+services:
+  pihole:
+    image: pihole/pihole:2024.02.2
+    container_name: pihole
+    restart: unless-stopped
+    cap_add:
+        - NET_ADMIN
+    network_mode: "host"
+    ports:
+      - "53:53/tcp" # DNS
+      - "53:53/udp" # DNS
+      - "67:67/udp" # DHCP
+      - "${PORT}:${PORT}/tcp" # WebUI
+    environment:
+      TZ: ${TZ}
+      WEBPASSWORD: ${WEBPASSWORD}
+      WEB_PORT: ${PORT}
+    volumes:
+      - "${DIR_ETC_PIHOLE}:/etc/pihole"
+      - "${DIR_ETC_DNSMASQ_D}:/etc/dnsmasq.d"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      # router: pihole
+      - "traefik.http.routers.pihole.entrypoints=https"
+      - "traefik.http.routers.pihole.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.pihole.middlewares=addprefix-pihole,redirectregex-pihole,secured@file"
+      - "traefik.http.routers.pihole.tls=true"
+      - "traefik.http.routers.pihole.service=pihole"
+      # service: pihole
+      - "traefik.http.services.pihole.loadbalancer.server.port=80"
+      # middleware: addprefix-pihole
+      - "traefik.http.middlewares.addprefix-pihole.addPrefix.prefix=/admin"
+      # middleware: redirectregex-pihole
+      - "traefik.http.middlewares.redirectregex-pihole.redirectregex.regex=/admin/$"
+      - "traefik.http.middlewares.redirectregex-pihole.redirectregex.replacement=/"

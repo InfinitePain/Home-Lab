@@ -1,0 +1,87 @@
+http:
+  routers:
+    casaos:
+      entryPoints:
+        - https
+      rule: "Host(`casaos.example.com`)"
+      middlewares:
+        - secured
+      tls: {}
+      service: "casaos"
+    threadfin-main:
+      entryPoints:
+        - https
+      rule: "Host(`threadfin.example.com`)"
+      middlewares:
+        - secured
+      tls: {}
+      service: "threadfin-main"
+    threadfin-streamlink:
+      entryPoints:
+        - https
+      rule: "Host(`tf-streamlink.example.com`)"
+      middlewares:
+        - secured
+      tls: {}
+      service: "threadfin-streamlink"
+
+  services:
+    casaos:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.11:8080"
+    jellyfin:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.11:8096"
+    omadactl:
+      loadBalancer:
+        servers:
+          - url: "https://192.168.0.11:8043"
+
+  middlewares:
+    default-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          X-Forwarded-Proto: https
+
+    default-whitelist:
+      ipWhiteList:
+        sourceRange:
+          - "10.0.0.0/8"
+          - "192.168.0.0/16"
+          - "172.16.0.0/12"
+
+    secured:
+      chain:
+        middlewares:
+          - default-whitelist
+          - default-headers
+
+tls:
+  options:
+    default:
+      sniStrict: true
+      minVersion: "VersionTLS12"
+      curvePreferences: 
+        - "secp521r1"
+        - "secp384r1"
+      cipherSuites:
+        - "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+        - "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+        - "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305"
+        - "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+        - "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+        - "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+        - "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256"
+        - "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"
+    mintls13:
+      minVersion: "VersionTLS13"

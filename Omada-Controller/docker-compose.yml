@@ -5,14 +5,14 @@ version: "3"
 
 services:
   omada-controller:
-    image: mbentley/omada-controller:5.12
+    image: mbentley/omada-controller:5.13
     container_name: omada-controller
     restart: unless-stopped
     network_mode: host
     ports:
       - "8088:8088"
-      # - "8043:8043"
-      # - "8843:8843"
+      - "8043:8043"
+      - "8843:8843"
       - "27001:27001/udp"
       - "29810:29810/udp"
       - "29811:29811"
@@ -47,5 +47,18 @@ services:
       # SSL_KEY_NAME: "tls.key"
       TZ: ${TZ}
     volumes:
-     - "${dir_data}:/opt/tplink/EAPController/data"
-     - "${dir_logs}:/opt/tplink/EAPController/logs"
+      - "${DIR_DATA}:/opt/tplink/EAPController/data"
+      - "${DIR_LOGS}:/opt/tplink/EAPController/logs"
+    labels:
+      - "traefik.enable=true"
+      # router: omadactl
+      - "traefik.http.routers.omadactl.entrypoints=https"
+      - "traefik.http.routers.omadactl.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.omadactl.middlewares=omadactl-headers,secured@file"
+      - "traefik.http.routers.omadactl.service=omadactl@file"
+      - "traefik.http.routers.omadactl.tls=true"
+      # service: omadactl
+      - "traefik.http.services.omadactl.loadbalancer.server.port=8043"
+      # middleware: omadactl-headers
+      - "traefik.http.middlewares.omadactl-headers.headers.customrequestheaders.host=${DOMAIN}:8043"
+      - "traefik.http.middlewares.omadactl-headers.headers.customresponseheaders.host=${DOMAIN}"
