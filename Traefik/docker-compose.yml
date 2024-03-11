@@ -63,18 +63,18 @@ services:
       - "--certificatesResolvers.production.acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
       - "--certificatesResolvers.production.acme.dnsChallenge.provider=cloudflare"
       - "--certificatesResolvers.production.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
-    labels:
-      - "traefik.enable=true"
+#    labels:
+#      - "traefik.enable=true"
       # router: traefik
-      - "traefik.http.routers.traefik.entrypoints=https"
-      - "traefik.http.routers.traefik.rule=Host(`${DOMAIN_TRAEFIK}`)"
-      - "traefik.http.routers.traefik.middlewares=traefik-auth,sslheader,default-whitelist@file"
-      - "traefik.http.routers.traefik.service=api@internal"
-      - "traefik.http.routers.traefik.tls=true"
+#      - "traefik.http.routers.traefik.entrypoints=https"
+#      - "traefik.http.routers.traefik.rule=Host(`${DOMAIN_TRAEFIK}`)"
+#      - "traefik.http.routers.traefik.middlewares=traefik-auth,sslheader,default-whitelist@file"
+#      - "traefik.http.routers.traefik.service=api@internal"
+#      - "traefik.http.routers.traefik.tls=true"
       # middleware: traefik-auth
-      - "traefik.http.middlewares.traefik-auth.basicauth.usersFile=/certs/auth/traefik_usersfile"
+#      - "traefik.http.middlewares.traefik-auth.basicauth.usersFile=/certs/auth/traefik_usersfile"
       # middleware: sslheader
-      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+#      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
 
 networks:
   proxy:
