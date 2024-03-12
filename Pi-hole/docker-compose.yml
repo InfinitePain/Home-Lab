@@ -31,7 +31,7 @@ services:
       - "traefik.http.routers.pihole.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.pihole.middlewares=redirectregex-pihole,addprefix-pihole,secured@file"
       - "traefik.http.routers.pihole.tls=true"
-      - "traefik.http.routers.pihole.tls.certresolver=staging" # production
+      - "traefik.http.routers.pihole.tls.certresolver=${CERT_RESOLVER}" # staging or production
       - "traefik.http.routers.pihole.service=pihole@file"
       # service: pihole
       - "traefik.http.services.pihole.loadbalancer.server.port=80"

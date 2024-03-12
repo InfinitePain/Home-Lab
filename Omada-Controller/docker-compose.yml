@@ -57,7 +57,7 @@ services:
       - "traefik.http.routers.omadactl.middlewares=omadactl-headers,secured@file"
       - "traefik.http.routers.omadactl.service=omadactl@file"
       - "traefik.http.routers.omadactl.tls=true"
-      - "traefik.http.routers.omadactl.tls.certresolver=staging" # production
+      - "traefik.http.routers.omadactl.tls.certresolver=${CERT_RESOLVER}" # staging or production
       # service: omadactl
       - "traefik.http.services.omadactl.loadbalancer.server.port=8043"
       # middleware: omadactl-headers

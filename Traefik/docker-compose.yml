@@ -68,7 +68,7 @@ services:
 #      - "traefik.http.routers.traefik.middlewares=traefik-auth,sslheader,default-whitelist@file"
 #      - "traefik.http.routers.traefik.service=api@internal"
 #      - "traefik.http.routers.traefik.tls=true"
-#      - "traefik.http.routers.traefik.tls.certresolver=staging" # production
+#      - "traefik.http.routers.traefik.tls.certresolver=${CERT_RESOLVER}" # staging or production
       # middleware: traefik-auth
 #      - "traefik.http.middlewares.traefik-auth.basicauth.usersFile=/certs/auth/traefik_usersfile"
       # middleware: sslheader
