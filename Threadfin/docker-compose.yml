@@ -27,6 +27,7 @@ services:
       - "traefik.http.routers.threadfin.middlewares=secured@file"
       - "traefik.http.routers.threadfin.service=threadfin"
       - "traefik.http.routers.threadfin.tls=true"
+      - "traefik.http.routers.threadfin.tls.certresolver=staging" # production
       # service: threadfin
       - "traefik.http.services.threadfin.loadbalancer.server.port=${PORT_THREADFIN}"
 
@@ -53,6 +54,7 @@ services:
       - "traefik.http.routers.tf-streamlink.middlewares=secured@file"
       - "traefik.http.routers.tf-streamlink.service=tf-streamlink"
       - "traefik.http.routers.tf-streamlink.tls=true"
+      - "traefik.http.routers.tf-streamlink.tls.certresolver=staging" # production
       # service: tf-streamlink
       - "traefik.http.services.tf-streamlink.loadbalancer.server.port=${PORT_TF_STREAMLINK}"
 

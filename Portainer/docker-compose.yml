@@ -27,6 +27,7 @@ services:
       - "traefik.http.routers.portainer-frontend.middlewares=secured@file"
       - "traefik.http.routers.portainer-frontend.service=portainer-frontend"
       - "traefik.http.routers.portainer-frontend.tls=true"
+      - "traefik.http.routers.portainer-frontend.tls.certresolver=staging" # production
       # router: portainer-edge
       # - "traefik.http.routers.portainer-edge.entrypoints=https"
       # - "traefik.http.routers.portainer-edge.rule=Host(`${DOMAIN}`)"

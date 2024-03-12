@@ -8,22 +8,6 @@ http:
         - secured
       tls: {}
       service: "casaos"
-    threadfin-main:
-      entryPoints:
-        - https
-      rule: "Host(`threadfin.example.com`)"
-      middlewares:
-        - secured
-      tls: {}
-      service: "threadfin-main"
-    threadfin-streamlink:
-      entryPoints:
-        - https
-      rule: "Host(`tf-streamlink.example.com`)"
-      middlewares:
-        - secured
-      tls: {}
-      service: "threadfin-streamlink"
 
   services:
     casaos:
@@ -71,7 +55,7 @@ tls:
     default:
       sniStrict: true
       minVersion: "VersionTLS12"
-      curvePreferences: 
+      curvePreferences:
         - "secp521r1"
         - "secp384r1"
       cipherSuites:

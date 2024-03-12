@@ -41,9 +41,6 @@ services:
       - "--entrypoints.http.http.redirections.entryPoint.scheme=https"
       # entryPoints.https
       - "--entrypoints.https.address=:443"
-      - "--entrypoints.https.http.tls.certResolver=staging" # production
-      - "--entrypoints.https.http.tls.domains[0].main=${DOMAIN}"
-      - "--entrypoints.https.http.tls.domains[0].sans=*.${DOMAIN}"
       # serversTransport
       - "--serversTransport.insecureSkipVerify=true"
       # providers
@@ -71,6 +68,7 @@ services:
 #      - "traefik.http.routers.traefik.middlewares=traefik-auth,sslheader,default-whitelist@file"
 #      - "traefik.http.routers.traefik.service=api@internal"
 #      - "traefik.http.routers.traefik.tls=true"
+#      - "traefik.http.routers.traefik.tls.certresolver=staging" # production
       # middleware: traefik-auth
 #      - "traefik.http.middlewares.traefik-auth.basicauth.usersFile=/certs/auth/traefik_usersfile"
       # middleware: sslheader
