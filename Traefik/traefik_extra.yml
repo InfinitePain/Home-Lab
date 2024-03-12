@@ -6,7 +6,8 @@ http:
       rule: "Host(`casaos.example.com`)"
       middlewares:
         - secured
-      tls: {}
+      tls:
+        certResolver: "staging"
       service: "casaos"
 
   services:
@@ -22,6 +23,10 @@ http:
       loadBalancer:
         servers:
           - url: "https://192.168.0.11:8043"
+    pihole:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.11:8084"
 
   middlewares:
     default-headers:

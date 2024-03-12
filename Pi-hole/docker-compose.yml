@@ -29,14 +29,14 @@ services:
       # router: pihole
       - "traefik.http.routers.pihole.entrypoints=https"
       - "traefik.http.routers.pihole.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.pihole.middlewares=addprefix-pihole,redirectregex-pihole,secured@file"
+      - "traefik.http.routers.pihole.middlewares=redirectregex-pihole,addprefix-pihole,secured@file"
       - "traefik.http.routers.pihole.tls=true"
       - "traefik.http.routers.pihole.tls.certresolver=staging" # production
-      - "traefik.http.routers.pihole.service=pihole"
+      - "traefik.http.routers.pihole.service=pihole@file"
       # service: pihole
       - "traefik.http.services.pihole.loadbalancer.server.port=80"
       # middleware: addprefix-pihole
-      - "traefik.http.middlewares.addprefix-pihole.addPrefix.prefix=/admin"
+      - "traefik.http.middlewares.addprefix-pihole.addprefix.prefix=/admin"
       # middleware: redirectregex-pihole
       - "traefik.http.middlewares.redirectregex-pihole.redirectregex.regex=/admin/$"
       - "traefik.http.middlewares.redirectregex-pihole.redirectregex.replacement=/"
