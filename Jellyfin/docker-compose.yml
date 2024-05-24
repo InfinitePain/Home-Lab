@@ -5,7 +5,7 @@ version: "3"
 
 services:
   jellyfin:
-    image: lscr.io/linuxserver/jellyfin:10.8.13
+    image: lscr.io/linuxserver/jellyfin:2021.12.16
     container_name: jellyfin
     restart: unless-stopped
     # by id as these may not exist within the container. 
