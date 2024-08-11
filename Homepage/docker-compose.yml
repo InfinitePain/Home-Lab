@@ -1,0 +1,62 @@
+# Title: Homepage
+# Description: A simple homepage
+
+version: '3'
+
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:v0.8.11
+    container_name: homepage
+    restart: always
+    networks:
+      - proxy
+      - backend
+    ports:
+      - 3000:3000
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      HOMEPAGE_VAR_GLANCES_URL: ${GLANCES_URL}
+      HOMEPAGE_VAR_GLANCES_USERNAME: ${GLANCES_USERNAME}
+      HOMEPAGE_VAR_GLANCES_PASSWORD: ${GLANCES_PASSWORD}
+      HOMEPAGE_VAR_OPENMETEO_LABEL: ${OPENMETEO_LABEL}
+      HOMEPAGE_VAR_OPENMETEO_LATITUDE: ${OPENMETEO_LATITUDE}
+      HOMEPAGE_VAR_OPENMETEO_LONGITUDE: ${OPENMETEO_LONGITUDE}
+      HOMEPAGE_VAR_TIMEZONE: ${TIMEZONE}
+      HOMEPAGE_VAR_ICAL_URL: ${ICAL_URL}
+      HOMEPAGE_VAR_ICAL_NAME: ${ICAL_NAME}
+      HOMEPAGE_VAR_PORTAINER_URL: ${PORTAINER_URL}
+    volumes:
+      - /etc/hosts:/etc/hosts:ro
+      - ${DIR_CONFIG}:/app/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      # router: homepage
+      - "traefik.http.routers.homepage.entrypoints=https"
+      - "traefik.http.routers.homepage.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.homepage.middlewares=authentik@file"
+      - "traefik.http.routers.homepage.service=homepage"
+      - "traefik.http.routers.homepage.tls=true"
+      - "traefik.http.routers.homepage.tls.certresolver=${CERT_RESOLVER}" # staging or production
+      # service: homepage
+      - "traefik.http.services.homepage.loadbalancer.server.port=3000"
+
+  dockerproxy:
+    image: ghcr.io/tecnativa/docker-socket-proxy:latest
+    container_name: dockerproxy
+    restart: always
+    networks:
+      - backend
+    ports:
+      - 127.0.0.1:2375:2375
+    environment:
+      CONTAINERS: 1 # Allow access to viewing containers
+      POST: 0 # Disallow any POST operations (effectively read-only)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Mounted as read-only
+
+networks:
+  proxy:
+    external: true
+  backend:

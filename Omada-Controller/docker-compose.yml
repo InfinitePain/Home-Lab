@@ -1,4 +1,4 @@
-# Title: omada-controller
+# Title: Omada Controller
 # Description: TP-Link Omada Controller
 
 version: "3"
@@ -7,20 +7,20 @@ services:
   omada-controller:
     image: mbentley/omada-controller:5.13
     container_name: omada-controller
-    restart: unless-stopped
+    restart: always
     network_mode: host
-    ports:
-      - "8088:8088"
-      - "8043:8043"
-      - "8843:8843"
-      - "27001:27001/udp"
-      - "29810:29810/udp"
-      - "29811:29811"
-      - "29812:29812"
-      - "29813:29813"
-      - "29814:29814"
-      - "29815:29815"
-      - "29816:29816"
+    # ports:
+    #   - "8088:8088"
+    #   - "8043:8043"
+    #   - "8843:8843"
+    #   - "27001:27001/udp"
+    #   - "29810:29810/udp"
+    #   - "29811:29811"
+    #   - "29812:29812"
+    #   - "29813:29813"
+    #   - "29814:29814"
+    #   - "29815:29815"
+    #   - "29816:29816"
     ulimits:
       nofile:
         soft: 4096
@@ -28,9 +28,9 @@ services:
     stop_grace_period: 60s
     environment:
       MANAGE_HTTP_PORT: 8088
-      # MANAGE_HTTPS_PORT: 8043
+      MANAGE_HTTPS_PORT: 8043
       PORTAL_HTTP_PORT: 8088
-      # PORTAL_HTTPS_PORT: 8843
+      PORTAL_HTTPS_PORT: 8843
       PORT_ADOPT_V1: 29812
       PORT_APP_DISCOVERY: 27001
       PORT_DISCOVERY: 29810
@@ -50,11 +50,12 @@ services:
       - "${DIR_DATA}:/opt/tplink/EAPController/data"
       - "${DIR_LOGS}:/opt/tplink/EAPController/logs"
     labels:
+      # Traefik 2.0
       - "traefik.enable=true"
       # router: omadactl
       - "traefik.http.routers.omadactl.entrypoints=https"
       - "traefik.http.routers.omadactl.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.omadactl.middlewares=omadactl-headers,secured@file"
+      - "traefik.http.routers.omadactl.middlewares=omadactl-redirect,omadactl-headers,default-whitelist@file"
       - "traefik.http.routers.omadactl.service=omadactl@file"
       - "traefik.http.routers.omadactl.tls=true"
       - "traefik.http.routers.omadactl.tls.certresolver=${CERT_RESOLVER}" # staging or production
@@ -63,3 +64,19 @@ services:
       # middleware: omadactl-headers
       - "traefik.http.middlewares.omadactl-headers.headers.customrequestheaders.host=${DOMAIN}:8043"
       - "traefik.http.middlewares.omadactl-headers.headers.customresponseheaders.host=${DOMAIN}"
+      # middleware: omadactl-redirect
+      - "traefik.http.middlewares.omadactl-redirect.redirectregex.regex=^https:\\/\\/([^\\/]+)\\/?$$"
+      - "traefik.http.middlewares.omadactl-redirect.redirectregex.replacement=https://$$1/login"
+      # Homepage Dashboard
+      - homepage.group=Networking
+      - homepage.name=Omada
+      - homepage.icon=omada
+      - homepage.href=https://${DOMAIN}
+      - homepage.description=Network Management
+      - homepage.weight=10
+      - homepage.widget.type=omada
+      - homepage.widget.fields=["connectedAp", "activeUser", "alerts", "connectedGateways", "connectedSwitches"]
+      - homepage.widget.url=https://${DOMAIN}
+      - homepage.widget.username=${HOMEPAGE_VAR_OMADA_USERNAME}
+      - homepage.widget.password=${HOMEPAGE_VAR_OMADA_PASSWORD}
+      - homepage.widget.site=${HOMEPAGE_VAR_OMADA_SITENAME}

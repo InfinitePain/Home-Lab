@@ -7,16 +7,24 @@ services:
   traefik:
     image: traefik:v2.11.0
     container_name: traefik
-    restart: unless-stopped
+    restart: always
     security_opt:
       - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 5s
+      timeout: 1s
+      retries: 3
+      start_period: 10s
     networks:
       - proxy
     ports:
       - 80:80
       - 443:443
+      - 5432:5432
+      - 636:636
     environment:
-      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -31,9 +39,10 @@ services:
       - "--log.level=ERROR"
       # - "--log.filePath=/traefik.log"
       # api
-      - "--api=false"
+      - "--api=true"
       - "--api.dashboard=false"
       - "--api.debug=false"
+      - "--ping=true"
       # entryPoints
       # entryPoints.http
       - "--entrypoints.http.address=:80"
@@ -41,6 +50,10 @@ services:
       - "--entrypoints.http.http.redirections.entryPoint.scheme=https"
       # entryPoints.https
       - "--entrypoints.https.address=:443"
+      # entryPoints.postgres
+      - "--entrypoints.postgres.address=:5432"
+      # entryPoints.auth-ldap
+      - "--entrypoints.auth-ldap.address=:636"
       # serversTransport
       - "--serversTransport.insecureSkipVerify=true"
       # providers
@@ -70,7 +83,7 @@ services:
 #      - "traefik.http.routers.traefik.tls=true"
 #      - "traefik.http.routers.traefik.tls.certresolver=${CERT_RESOLVER}" # staging or production
       # middleware: traefik-auth
-#      - "traefik.http.middlewares.traefik-auth.basicauth.usersFile=/certs/auth/traefik_usersfile"
+#      - "traefik.http.middlewares.traefik-auth.digestauth.usersFile=/certs/auth/traefik_usersfile"
       # middleware: sslheader
 #      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
 

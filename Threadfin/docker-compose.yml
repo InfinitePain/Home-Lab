@@ -7,7 +7,7 @@ services:
   threadfin:
     image: fyb3roptik/threadfin:1.0.24
     container_name: threadfin
-    restart: unless-stopped
+    restart: always
     networks:
       - proxy
     ports:
@@ -20,7 +20,9 @@ services:
     volumes:
       - ${DIR_THREADFIN_CONF}:/home/threadfin/conf
     labels:
+      # Traefik 2.0
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       # router: threadfin
       - "traefik.http.routers.threadfin.entrypoints=https"
       - "traefik.http.routers.threadfin.rule=Host(`${DOMAIN_THREADFIN}`)"
@@ -30,11 +32,18 @@ services:
       - "traefik.http.routers.threadfin.tls.certresolver=${CERT_RESOLVER}" # staging or production
       # service: threadfin
       - "traefik.http.services.threadfin.loadbalancer.server.port=${PORT_THREADFIN}"
+      # Homepage Dashboard
+      - homepage.group=Providers
+      - homepage.name=Threadfin
+      - homepage.icon=mdi-antenna
+      - homepage.href=https://${DOMAIN_THREADFIN}
+      - homepage.description=M3U Proxy for live TV
+      - homepage.weight=20
 
   tf-streamlink:
     image: tf-streamlink:1.0.24
     container_name: tf-streamlink
-    restart: unless-stopped
+    restart: always
     networks:
       - proxy
     ports:
@@ -47,7 +56,9 @@ services:
     volumes:
       - ${DIR_TF_STREAMLINK_CONF}:/home/threadfin/conf
     labels:
+      # Traefik 2.0
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       # router: tf-streamlink
       - "traefik.http.routers.tf-streamlink.entrypoints=https"
       - "traefik.http.routers.tf-streamlink.rule=Host(`${DOMAIN_TF_STREAMLINK}`)"
@@ -57,6 +68,13 @@ services:
       - "traefik.http.routers.tf-streamlink.tls.certresolver=${CERT_RESOLVER}" # staging or production
       # service: tf-streamlink
       - "traefik.http.services.tf-streamlink.loadbalancer.server.port=${PORT_TF_STREAMLINK}"
+      # Homepage Dashboard
+      - homepage.group=Providers
+      - homepage.name=Threadfin Streamlink
+      - homepage.icon=mdi-antenna
+      - homepage.href=https://${DOMAIN_TF_STREAMLINK}
+      - homepage.description=Converter for HLS streams to MPEG-TS
+      - homepage.weight=30
 
 networks:
   proxy:

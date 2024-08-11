@@ -1,0 +1,51 @@
+# Title: Glances
+# Description:System monitoring tool
+
+version: '3'
+
+services:
+  glances:
+    image: nicolargo/glances:3.4.0.5
+    container_name: glances
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:61208"]
+      interval: 10s
+      timeout: 10s
+      start_period: 20s
+      retries: 3
+    pid: host
+    networks:
+      - proxy
+    # ports:
+    #   - "61208:61208"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      GLANCES_OPT: "-w"
+    labels:
+      # Traefik 2.0
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      # router: glances
+      - "traefik.http.routers.glances.entrypoints=https"
+      - "traefik.http.routers.glances.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.glances.middlewares=glances-auth,glances-sslheader,secured@file"
+      - "traefik.http.routers.glances.service=glances"
+      - "traefik.http.routers.glances.tls=true"
+      - "traefik.http.routers.glances.tls.certresolver=${CERT_RESOLVER}" # staging or production
+      # middleware: glances-auth
+      - "traefik.http.middlewares.glances-auth.basicauth.usersfile=/certs/auth/glances_usersfile"
+      # service: glances
+      - "traefik.http.services.glances.loadbalancer.server.port=61208"
+      # Homepage Dashboard
+      - homepage.group=Management
+      - homepage.name=Glances
+      - homepage.icon=mdi-server
+      - homepage.href=https://${DOMAIN}
+      - homepage.description=System monitoring tool
+      - homepage.weight=30
+
+networks:
+  proxy:
+    external: true

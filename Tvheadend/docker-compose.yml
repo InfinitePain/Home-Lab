@@ -1,0 +1,21 @@
+# Title: Tvheadend
+# Description: Tvheadend is a TV streaming server and recorder for Linux.
+
+version: '3'
+
+services:
+  tvheadend:
+    image: lscr.io/linuxserver/tvheadend:latest
+    container_name: tvheadend
+    restart: always
+    network_mode: host
+    ports:
+      - 9981:9981
+      - 9982:9982
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+#      RUN_OPTS: --noacl
+    volumes:
+      - ${DIR_CONFIG}:/config
