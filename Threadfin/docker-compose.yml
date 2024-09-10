@@ -5,7 +5,7 @@ version: "3"
 
 services:
   threadfin:
-    image: fyb3roptik/threadfin:1.0.24
+    image: fyb3roptik/threadfin:1.2.7
     container_name: threadfin
     restart: always
     networks:

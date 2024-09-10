@@ -1,7 +1,7 @@
 # Name: tf-streamlink:1.0.24
 # Description: Dockerfile for Threadfin with Streamlink
 
-FROM fyb3roptik/threadfin:1.0.24
+FROM fyb3roptik/threadfin:1.2.7
 
 # Packages for Streamkink
 RUN apt-get update && apt-get upgrade -y && \
