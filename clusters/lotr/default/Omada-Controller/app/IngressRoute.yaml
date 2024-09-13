@@ -1,0 +1,19 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: &app omada-controller
+  namespace: cattle-system
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`omada.pixelstack.live`)
+      kind: Rule
+      services:
+        - name: *app
+          port: 443
+      middlewares:
+        - name: secured

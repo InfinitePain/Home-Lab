@@ -1,0 +1,82 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pgadmin
+  namespace: database
+spec:
+  releaseName: pgadmin
+  interval: 5m
+  chart:
+    spec:
+      # renovate: datasource=helm depName=bjw-s repository=https://bjw-s.github.io/helm-charts/
+      chart: app-template
+      reconcileStrategy: ChartVersion
+      version: 3.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+  dependsOn:
+    - name: longhorn
+      namespace: longhorn-system
+    - name: traefik
+      namespace: traefik
+  values:
+    controllers:
+      pgadmin:
+        replicas: 1
+        strategy: Recreate
+        labels:
+          app.kubernetes.io/instance: pgadmin
+          app.kubernetes.io/name: pgadmin
+        containers:
+          app:
+            image:
+              repository: dpage/pgadmin4
+              tag: 8.11.0
+              pullPolicy: Always
+            ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+            env:
+              PGADMIN_DEFAULT_EMAIL:
+                valueFrom:
+                  secretKeyRef:
+                    name: pgadmin-secret
+                    key: PGADMIN_DEFAULT_EMAIL
+              PGADMIN_DEFAULT_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: pgadmin-secret
+                    key: PGADMIN_DEFAULT_PASSWORD
+        initContainers:
+          init-permissions:
+            image:
+              repository: busybox
+              tag: latest
+              pullPolicy: IfNotPresent
+            command: ['sh', '-c', 'chown -R 5050:5050 /var/lib/pgadmin']
+    service:
+      app:
+        labels:
+          app: pgadmin
+        controller: pgadmin
+        ports:
+          http:
+            port: 80
+            protocol: TCP
+            targetPort: 80
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        globalMounts:
+          - path: /var/lib/pgadmin
+            readOnly: false
+

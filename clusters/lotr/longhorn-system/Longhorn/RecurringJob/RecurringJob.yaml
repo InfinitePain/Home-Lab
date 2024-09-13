@@ -1,0 +1,38 @@
+apiVersion: longhorn.io/v1beta1
+kind: RecurringJob
+metadata:
+  name: daily-snapshot
+  namespace: longhorn-system
+spec:
+  cron: "0 0 * * *"  # Daily at midnight
+  task: snapshot
+  retain: 14         # Retain the last 14 snapshots
+  concurrency: 1
+  groups:
+  - default          # Applies to all volumes in the 'default' group
+---
+apiVersion: longhorn.io/v1beta1
+kind: RecurringJob
+metadata:
+  name: weekly-backup
+  namespace: longhorn-system
+spec:
+  cron: "0 0 * * 0"  # Weekly on Sunday at midnight
+  task: backup
+  retain: 4          # Retain the last 4 backups (about a month)
+  concurrency: 1
+  groups:
+  - default          # Applies to all volumes in the 'default' group
+---
+apiVersion: longhorn.io/v1beta1
+kind: RecurringJob
+metadata:
+  name: monthly-backup
+  namespace: longhorn-system
+spec:
+  cron: "0 0 1 * *"  # Monthly on the 1st at midnight
+  task: backup
+  retain: 3          # Retain the last 3 backups (about 3 months)
+  concurrency: 1
+  groups:
+  - default          # Applies to all volumes in the 'default' group

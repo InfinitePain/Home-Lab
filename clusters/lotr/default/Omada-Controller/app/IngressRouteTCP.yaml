@@ -1,0 +1,114 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: &app omada-ctl-v1
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - *app
+  routes:
+  - match: HostSNI(`omada.pixelstack.live`)
+    middlewares:
+    - name: default-whitelist
+      namespace: default
+    services:
+    - name: *app
+      port: 29811
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: &app omada-adopt-v1
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - *app
+  routes:
+  - match: HostSNI(`omada.pixelstack.live`)
+    middlewares:
+    - name: default-whitelist
+      namespace: default
+    services:
+    - name: *app
+      port: 29812
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: &app omada-upg-v1
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - *app
+  routes:
+  - match: HostSNI(`omada.pixelstack.live`)
+    middlewares:
+    - name: default-whitelist
+      namespace: default
+    services:
+    - name: *app
+      port: 29813
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: &app omada-ctl-v2
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - *app
+  routes:
+  - match: HostSNI(`omada.pixelstack.live`)
+    middlewares:
+    - name: default-whitelist
+      namespace: default
+    services:
+    - name: *app
+      port: 29814
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: &app omada-tsfr-v2
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - *app
+  routes:
+  - match: HostSNI(`omada.pixelstack.live`)
+    middlewares:
+    - name: default-whitelist
+      namespace: default
+    services:
+    - name: *app
+      port: 29815
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: &app omada-rtty-v2
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - *app
+  routes:
+  - match: HostSNI(`omada.pixelstack.live`)
+    middlewares:
+    - name: default-whitelist
+      namespace: default
+    services:
+    - name: *app
+      port: 29816

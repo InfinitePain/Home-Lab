@@ -1,0 +1,99 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app tvheadend
+  namespace: default
+spec:
+  releaseName: *app
+  interval: 5m
+  chart:
+    spec:
+      # renovate: datasource=helm depName=bjw-s repository=https://bjw-s.github.io/helm-charts/
+      chart: app-template
+      reconcileStrategy: ChartVersion
+      version: 3.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+  dependsOn:
+    - name: longhorn
+      namespace: longhorn-system
+    - name: traefik
+      namespace: traefik
+  values:
+    controllers:
+      tvheadend:
+        replicas: 1
+        strategy: Recreate
+        labels:
+          app.kubernetes.io/instance: *app
+          app.kubernetes.io/name: *app
+        containers:
+          app:
+            image:
+              repository: lscr.io/linuxserver/tvheadend
+              tag: version-dd82541c
+              pullPolicy: Always
+            ports:
+            # WebUI
+            - containerPort: 9981
+              name: tvheadend-http
+              protocol: TCP
+            # HTSP
+            - containerPort: 9982
+              name: tvheadend-htsp
+              protocol: TCP
+            env:
+              DOCKER_MODS: linuxserver/mods:universal-package-install
+              INSTALL_PACKAGES: python3|python3-pip|python3-venv|libxml2-dev|libxslt-dev
+              INSTALL_PIP_PACKAGES: setuptools|wheel|versioningit|certifi|isodate|pycountry|pycryptodome|pysocks|requests|trio|trio-websocket|typing_extensions|urllib3|websocket-client|streamlink
+              TZ: "Europe/Berlin"
+              #RUN_OPTS: --noacl
+    service:
+      app:
+        labels:
+          app: *app
+        controller: *app
+        type: LoadBalancer
+        loadBalancerIP: 192.168.0.18
+        externalTrafficPolicy: Local
+        ports:
+          http:
+            port: 9981
+            protocol: TCP
+            targetPort: 9981
+          htsp:
+            port: 9982
+            protocol: TCP
+            targetPort: 9982
+    persistence:
+      tvheadend:
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        globalMounts:
+          - path: /config
+            readOnly: false
+    networkpolicies:
+      app:
+        controller: *app
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: *app
+        policyTypes:
+          - Ingress
+        rules:
+          ingress:
+            - from:
+              - ipBlock:
+                  cidr: 10.0.0.0/8
+              - ipBlock:
+                  cidr: 192.168.0.0/16
+              - ipBlock:
+                  cidr: 172.16.0.0/20
+

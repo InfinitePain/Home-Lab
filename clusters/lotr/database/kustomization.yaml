@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # Pre Kustomizations
+  - ./Namespace.yaml
+  # Kustomizations
+  - ./CloudNativePG/kustomization.yaml
+  - ./pgAdmin/kustomization.yaml
+  # Post Kustomizations
+  - ./Middleware.yaml
+  - ./MiddlewareTCP.yaml

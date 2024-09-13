@@ -1,0 +1,25 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: example-com
+  namespace: traefik
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: Ignore
+    kustomize.toolkit.fluxcd.io/prune: Disabled
+spec:
+  secretName: example-com-staging-tls
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: "*.example.com"
+  dnsNames:
+  - "example.com"
+  - "*.example.com"

@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # Pre Kustomizations
+  - ./Namespace.yaml
+  # Kustomizations
+  - ./authentik/kustomization.yaml
+  - ./MinIO/kustomization.yaml
+  - ./Omada-Controller/kustomization.yaml
+  - ./Pi-hole/kustomization.yaml
+  - ./TrueNAS/kustomization.yaml
+#  - ./Tvheadend/kustomization.yaml
+  # Post Kustomization
+  - ./Middleware.yaml

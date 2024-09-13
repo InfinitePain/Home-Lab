@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+version: 1
+metadata:
+  name: default-source-authentication
+context: {}
+entries:
+  - attrs:
+      authentication: require_unauthenticated
+      denied_action: message_continue
+      designation: authentication
+      layout: stacked
+      name: Welcome to authentik!
+      policy_engine_mode: any
+      title: Welcome to authentik!
+    conditions: []
+    identifiers:
+      pk: d8e71dcb-5a89-4755-a8ff-85553895d40e
+      slug: default-source-authentication
+    model: authentik_flows.flow
+    state: created
+
+  - attrs:
+      expression: '# This policy ensures that this flow can only be used when the user
+
+        # is in a SSO Flow (meaning they come from an external IdP)
+
+        return ak_is_sso_flow'
+      name: default-source-authentication-if-sso
+    conditions: []
+    identifiers:
+      pk: 4fce4212-2639-4045-b8d0-19d712ce2ae6
+    model: authentik_policies_expression.expressionpolicy
+    state: created
+
+  - attrs:
+      geoip_binding: no_binding
+      network_binding: no_binding
+      remember_me_offset: seconds=0
+      session_duration: seconds=0
+    conditions: []
+    identifiers:
+      name: default-source-authentication-login
+      pk: c3867bca-f717-40ba-b98a-6c6b06ca9813
+    model: authentik_stages_user_login.userloginstage
+    state: created
+
+  - attrs:
+      invalid_response_action: retry
+      policy_engine_mode: any
+      re_evaluate_policies: true
+    conditions: []
+    identifiers:
+      order: 0
+      pk: b67f9b6d-06f0-4d32-b1a9-c855a0823281
+      stage: c3867bca-f717-40ba-b98a-6c6b06ca9813
+      target: d8e71dcb-5a89-4755-a8ff-85553895d40e
+    model: authentik_flows.flowstagebinding
+    state: created
+
+  - attrs:
+      enabled: true
+      timeout: 30
+    conditions: []
+    identifiers:
+      order: 0
+      pk: 5380a8eb-1f6e-46eb-a362-245ba243a92f
+      policy: 4fce4212-2639-4045-b8d0-19d712ce2ae6
+      target: d8e71dcb-5a89-4755-a8ff-85553895d40e
+    model: authentik_policies.policybinding
+    state: created

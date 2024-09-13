@@ -1,0 +1,43 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pihole-rewrite
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`pihole.pixelstack.live`) && !PathPrefix(`/admin`)
+      kind: Rule
+      services:
+        - name: pihole
+          port: 80
+      middlewares:
+        - name: addprefix-pihole
+        - name: secured
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pihole-redirect
+  namespace: default
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: Ignore
+    kustomize.toolkit.fluxcd.io/prune: Disabled
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`pihole.pixelstack.live`) && PathPrefix(`/admin`)
+      kind: Rule
+      services:
+        - name: pihole
+          port: 80
+      middlewares:
+        - name: redirectregex-pihole
+        - name: secured
+      priority: 1000

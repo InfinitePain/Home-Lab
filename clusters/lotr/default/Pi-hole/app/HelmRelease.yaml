@@ -1,0 +1,113 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app pihole
+  namespace: default
+spec:
+  releaseName: *app
+  interval: 5m
+  chart:
+    spec:
+      # renovate: datasource=helm depName=bjw-s repository=https://bjw-s.github.io/helm-charts/
+      chart: app-template
+      reconcileStrategy: ChartVersion
+      version: 3.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+  dependsOn:
+    - name: longhorn
+      namespace: longhorn-system
+    - name: traefik
+      namespace: traefik
+  values:
+    controllers:
+      pihole:
+        replicas: 1
+        strategy: Recreate
+        labels:
+          app.kubernetes.io/instance: *app
+          app.kubernetes.io/name: *app
+        containers:
+          app:
+            image:
+              repository: pihole/pihole
+              tag: 2024.07.0
+              pullPolicy: Always
+            ports:
+            # WebUI
+            - containerPort: 80
+              name: pihole-http
+              protocol: TCP
+            # DNS
+            - containerPort: 53
+              name: dns
+              protocol: TCP
+            - containerPort: 53
+              name: dns-udp
+              protocol: UDP
+            # DHCP
+            - containerPort: 67
+              name: client-udp
+              protocol: UDP
+            env:
+              WEBPASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: pihole-secret
+                    key: WEBPASSWORD
+              TZ: "Europe/Berlin"
+              FTLCONF_LOCAL_IPV4: "192.168.0.17"
+              PIHOLE_DNS_: "1.1.1.1;1.0.0.1"
+    service:
+      app:
+        labels:
+          app: *app
+        controller: *app
+        type: LoadBalancer
+        loadBalancerIP: 192.168.0.17
+        externalTrafficPolicy: Local
+        ports:
+          dns-tcp:
+            port: 53
+            protocol: TCP
+            targetPort: 53
+          dns-udp:
+            port: 53
+            protocol: UDP
+            targetPort: 53
+          webui:
+            port: 80
+            protocol: TCP
+            targetPort: 80
+    persistence:
+      etc-pihole:
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        globalMounts:
+          - path: /etc/pihole
+            readOnly: false
+    networkpolicies:
+      app:
+        controller: *app
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: *app
+        policyTypes:
+          - Ingress
+        rules:
+          ingress:
+            - from:
+              - ipBlock:
+                  cidr: 10.0.0.0/8
+              - ipBlock:
+                  cidr: 192.168.0.0/16
+              - ipBlock:
+                  cidr: 172.16.0.0/20
+

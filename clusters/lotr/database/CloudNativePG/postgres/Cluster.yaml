@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/cluster_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.4-4
+  primaryUpdateStrategy: unsupervised
+  storage:
+    size: 20Gi
+    storageClass: longhorn
+  superuserSecret:
+    name: postgres-superuser-secret
+  enableSuperuserAccess: true
+  postgresql:
+    parameters:
+      max_connections: "400"
+      shared_buffers: 256MB
+  resources:
+    requests:
+      cpu: 500m
+    limits:
+      memory: 3Gi
+  backup:
+    retentionPolicy: 30d
+    barmanObjectStore: &barmanObjectStore
+      data:
+        compression: bzip2
+      wal:
+        compression: bzip2
+        maxParallel: 2
+      destinationPath: s3://lotr@eu-west/cloudnative-pg/
+      endpointURL: https://minio-api.pixelstack.live
+      # Note: serverName version needs to be inclemented
+      # when recovering from an existing cnpg cluster
+      serverName: &currentCluster postgres-v1
+      s3Credentials:
+        accessKeyId:
+          name: s3-bucket-cloudnative-pg-secret
+          key: AWS_ACCESS_KEY_ID
+        secretAccessKey:
+          name: s3-bucket-cloudnative-pg-secret
+          key: AWS_SECRET_ACCESS_KEY
+  # Note: previousCluster needs to be set to the name of the previous
+  # cluster when recovering from an existing cnpg cluster
+#  bootstrap:
+#    recovery:
+#      source: &previousCluster app
+  # Note: externalClusters is needed when recovering from an existing cnpg cluster
+#  externalClusters:
+#    - name: *previousCluster
+#      barmanObjectStore:
+#        <<: *barmanObjectStore
+#        serverName: *previousCluster

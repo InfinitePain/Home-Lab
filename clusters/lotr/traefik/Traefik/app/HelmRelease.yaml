@@ -1,0 +1,162 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app traefik
+spec:
+  releaseName: *app
+  interval: 5m
+  chart:
+    spec:
+      # renovate: datasource=helm depName=traefik repository=https://helm.traefik.io/traefik
+      chart: traefik
+      version: 31.0.0
+      sourceRef:
+        kind: HelmRepository
+        name: traefik-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+  values:
+    globalArguments:
+      - "--global.sendanonymoususage=false"
+      - "--global.checknewversion=false"
+
+    additionalArguments:
+      # log
+      # By default, the level is set to ERROR. Alternative logging levels
+      # are DEBUG, PANIC, FATAL, ERROR, WARN, and INFO.
+      - "--log.level=INFO"
+      #  - "--log.filePath=/traefik.log"
+      # serversTransport
+      - "--serversTransport.insecureSkipVerify=true"
+    
+    deployment:
+      enabled: true
+      replicas: 2
+      annotations: {}
+      podAnnotations: {}
+      additionalContainers: []
+      initContainers: []
+    
+    ports:
+      web:
+        redirectTo: 
+          port: websecure
+          permanent: true
+      websecure:
+        http3:
+          enabled: true
+        advertisedPort: 4443
+        tls:
+          enabled: true
+      #postgres:
+      #  port: 5432
+      #  targetPort: 5432
+      #  exposedPort: 5432
+      #  expose:
+      #    default: true
+      auth-ldap:
+        port: 636
+        targetPort: 636
+        exposedPort: 636
+        expose:
+          default: true
+      omada-ctl-v1:
+        port: 29811
+        targetPort: 29811
+        exposedPort: 29811
+        expose:
+          default: true
+      omada-adopt-v1:
+        port: 29812
+        targetPort: 29812
+        exposedPort: 29812
+        expose:
+          default: true
+      omada-upg-v1:
+        port: 29813
+        targetPort: 29813
+        exposedPort: 29813
+        expose:
+          default: true
+      omada-ctl-v2:
+        port: 29814
+        targetPort: 29814
+        exposedPort: 29814
+        expose:
+          default: true
+      omada-tsfr-v2:
+        port: 29815
+        targetPort: 29815
+        exposedPort: 29815
+        expose:
+          default: true
+      omada-rtty-v2:
+        port: 29816
+        targetPort: 29816
+        exposedPort: 29816
+        expose:
+          default: true
+    
+    tlsOptions: 
+      default:
+        labels: {}
+        sniStrict: true
+        minVersion: VersionTLS12
+        curvePreferences:
+          - secp521r1
+          - secp384r1
+        cipherSuites:
+          - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+          - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+          - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+          - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+          - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+          - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+          - TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
+          - TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
+      mintls13:
+        labels: {}
+        minVersion: VersionTLS13
+
+    tlsStore:
+      default:
+        certificates:
+          - secretName: &cert pixelstack-live-tls
+        defaultCertificate:
+          secretName: *cert
+
+    ingressRoute:
+      dashboard:
+        enabled: true
+        matchRule: Host(`traefik.pixelstack.live`)
+        entryPoints: ["websecure"]
+        middlewares:
+          - name: authentik
+          - name: secured
+    
+    providers:
+      kubernetesCRD:
+        enabled: true
+        ingressClass: traefik-external
+        allowExternalNameServices: true
+      kubernetesIngress:
+        enabled: true
+        allowExternalNameServices: true
+        publishedService:
+          enabled: false
+    
+    rbac:
+      enabled: true
+    
+    service:
+      enabled: true
+      type: LoadBalancer
+      annotations: {}
+      labels: {}
+      spec:
+        loadBalancerIP: 192.168.0.16
+      loadBalancerSourceRanges: []
+      externalIPs: []

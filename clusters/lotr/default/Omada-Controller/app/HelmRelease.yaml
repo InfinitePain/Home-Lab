@@ -1,0 +1,202 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app omada-controller
+  namespace: default
+spec:
+  releaseName: *app
+  interval: 5m
+  chart:
+    spec:
+      # renovate: datasource=helm depName=bjw-s repository=https://bjw-s.github.io/helm-charts/
+      chart: app-template
+      reconcileStrategy: ChartVersion
+      version: 3.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+  dependsOn:
+    - name: longhorn
+      namespace: longhorn-system
+    - name: traefik
+      namespace: traefik
+  values:
+    defaultPodOptions:
+      terminationGracePeriodSeconds: 60
+
+    controllers:
+      omada-controller:
+        replicas: 1
+        strategy: Recreate
+        labels:
+          app.kubernetes.io/instance: *app
+          app.kubernetes.io/name: *app
+        containers:
+          app:
+            image:
+              repository: mbentley/omada-controller
+              tag: 5.14
+              pullPolicy: Always
+            ports:
+            # Management/User Portal HTTP
+            - containerPort: 80
+              name: mgmt-user-http
+              protocol: TCP
+            # Management Portal HTTPS
+            - containerPort: 443
+              name: mgmt-https
+              protocol: TCP
+            # User Portal HTTPS
+            #- containerPort: 443
+            #  name: user-https
+            #  protocol: TCP
+            # Controller Discovery App
+            #- containerPort: 27001
+            #  name: controller-discovery-app
+            #  protocol: UDP
+            # Controller Discovery
+            #- containerPort: 29810
+            #  name: controller-discovery
+            #  protocol: UDP
+            # Device Controller V1
+            - containerPort: 29811
+              name: ctl-v1
+              protocol: TCP
+            # Device Controller Adopt V1
+            - containerPort: 29812
+              name: adopt-v1
+              protocol: TCP
+            # Device Controller Upgrade V1
+            - containerPort: 29813
+              name: upg-v1
+              protocol: TCP
+            # Device Controller V2
+            - containerPort: 29814
+              name: ctl-v2
+              protocol: TCP
+            # Device Controller Transfer V2
+            - containerPort: 29815
+              name: tsfr-v2
+              protocol: TCP
+            # Device Controller RTTY V2
+            - containerPort: 29816
+              name: rtty-v2
+              protocol: TCP
+            env:
+              MANAGE_HTTP_PORT: 80
+              MANAGE_HTTPS_PORT: 443
+              PORTAL_HTTP_PORT: 80
+              PORTAL_HTTPS_PORT: 443
+              PORT_ADOPT_V1: 29812
+              PORT_APP_DISCOVERY: 27001
+              PORT_DISCOVERY: 29810
+              PORT_MANAGER_V1: 29811
+              PORT_MANAGER_V2: 29814
+              PORT_UPGRADE_V1: 29813
+              # PUID: 508
+              # PGID: 508
+              SHOW_SERVER_LOGS: "true"
+              SHOW_MONGODB_LOGS: "false"
+              # Name of the public cert chain mounted to /cert
+              # SSL_CERT_NAME: "tls.crt"
+              # Name of the private key mounted to /cert
+              # SSL_KEY_NAME: "tls.key"
+            resources:
+              limits:
+                cpu: 1500m
+                memory: 1024Mi
+              requests:
+                cpu: 500m
+                memory: 512Mi
+
+    service:
+      app:
+        labels:
+          app: *app
+        controller: *app
+        type: ClusterIP
+        ports:
+          mgmt-user-http:
+            port: 80
+            protocol: TCP
+            targetPort: 80
+          mgmt-https:
+            port: 443
+            protocol: TCP
+            targetPort: 443
+          #user-https:
+          #  port: 443
+          #  protocol: TCP
+          #  targetPort: 443
+          #controller-discovery-app:
+          #  port: 27001
+          #  protocol: UDP
+          #  targetPort: 27001
+          #controller-discovery:
+          #  port: 29810
+          #  protocol: UDP
+          #  targetPort: 29810
+          ctl-v1:
+            port: 29811
+            protocol: TCP
+            targetPort: 29811
+          adopt-v1:
+            port: 29812
+            protocol: TCP
+            targetPort: 29812
+          upg-v1:
+            port: 29813
+            protocol: TCP
+            targetPort: 29813
+          ctl-v2:
+            port: 29814
+            protocol: TCP
+            targetPort: 29814
+          tsfr-v2:
+            port: 29815
+            protocol: TCP
+            targetPort: 29815
+          rtty-v2:
+            port: 29816
+            protocol: TCP
+            targetPort: 29816
+
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        globalMounts:
+          - path: /opt/tplink/EAPController/data
+            readOnly: false
+      logs:
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        globalMounts:
+          - path: /opt/tplink/EAPController/logs
+            readOnly: false
+    networkpolicies:
+      app:
+        controller: *app
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: *app
+        policyTypes:
+          - Ingress
+        rules:
+          ingress:
+            - from:
+              - ipBlock:
+                  cidr: 10.0.0.0/8
+              - ipBlock:
+                  cidr: 192.168.0.0/16
+              - ipBlock:
+                  cidr: 172.16.0.0/20
+
