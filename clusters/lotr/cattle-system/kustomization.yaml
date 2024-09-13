@@ -8,4 +8,4 @@ resources:
   # Kustomizations
   - ./Rancher/kustomization.yaml
   # Post Kustomizations
-  - ./Middleware.yaml
+  - ./traefik/resources/Middleware.yaml
