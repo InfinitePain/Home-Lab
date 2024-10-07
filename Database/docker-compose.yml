@@ -38,7 +38,7 @@ services:
       - "traefik.tcp.services.postgresql.loadbalancer.server.port=5432"
 
   pgadmin:
-    image: dpage/pgadmin4:8.4
+    image: dpage/pgadmin4:8.12
     container_name: pgadmin
     restart: always
     healthcheck:
