@@ -126,7 +126,7 @@ services:
       - "traefik.enable=true"
       # router: traefik
       - "traefik.http.routers.traefik.entrypoints=https"
-      - "traefik.http.routers.traefik.rule=Host(`${DOMAIN_TRAEFIK:-traefik.pixelstack.live}}`)"
+      - "traefik.http.routers.traefik.rule=Host(`${DOMAIN_TRAEFIK:-traefik.pixelstack.live}`)"
       - "traefik.http.routers.traefik.middlewares=default-whitelist@file,authentik@file,sslheader"
 #      - "traefik.http.routers.traefik.middlewares=default-whitelist@file,traefik-auth,sslheader"
       - "traefik.http.routers.traefik.service=api@internal"
