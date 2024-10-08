@@ -120,9 +120,9 @@ services:
       AUTHENTIK_EMAIL__TIMEOUT: 10
       AUTHENTIK_EMAIL__FROM: ${AUTHENTIK_EMAIL_FROM}
     volumes:
-      - ${DIR_DATA}/authentik/media:/media
-      - ${DIR_DATA}/authentik/templates:/templates
-      - ${DIR_DATA}/authentik/certs:/certs
+      - ${DIR_DATA}/authentik-data/media:/media
+      - ${DIR_DATA}/authentik-data/templates:/templates
+      - ${DIR_DATA}/authentik-data/certs:/certs
 
   auth-ldap:
     image: ghcr.io/goauthentik/ldap:2024.2.2
