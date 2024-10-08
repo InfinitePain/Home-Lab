@@ -125,7 +125,7 @@ services:
       - ${DIR_AUTHENTIK_CERTS:-${DIR_DATA:+${DIR_DATA}/authentik/certs:-./authentik/certs}}:/certs
 
   auth-ldap:
-    image: ghcr.io/goauthentik/ldap:2024.2.2
+    image: ghcr.io/goauthentik/ldap:2024.8.3
     container_name: authentik-ldap
     restart: always
     networks:
