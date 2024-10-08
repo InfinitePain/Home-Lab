@@ -37,33 +37,33 @@ services:
       PORT_MANAGER_V1: 29811
       PORT_MANAGER_V2: 29814
       PORT_UPGRADE_V1: 29813
-      PUID: ${PUID}
-      PGID: ${PGID}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
       SHOW_SERVER_LOGS: "true"
       SHOW_MONGODB_LOGS: "false"
       # Name of the public cert chain mounted to /cert
       # SSL_CERT_NAME: "tls.crt"
       # Name of the private key mounted to /cert
       # SSL_KEY_NAME: "tls.key"
-      TZ: ${TZ}
+      TZ: ${TZ:-Europe/Berlin}
     volumes:
-      - "${DIR_DATA}:/opt/tplink/EAPController/data"
-      - "${DIR_LOGS}:/opt/tplink/EAPController/logs"
+      - "${DIR_DATA}/omada-data/data:/opt/tplink/EAPController/data"
+      - "${DIR_DATA}/omada-data/logs:/opt/tplink/EAPController/logs"
     labels:
       # Traefik 2.0
       - "traefik.enable=true"
       # router: omadactl
       - "traefik.http.routers.omadactl.entrypoints=https"
-      - "traefik.http.routers.omadactl.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.omadactl.rule=Host(`${DOMAIN_OMADA:-omada.pixelstack.live}`)"
       - "traefik.http.routers.omadactl.middlewares=omadactl-redirect,omadactl-headers,default-whitelist@file"
       - "traefik.http.routers.omadactl.service=omadactl@file"
       - "traefik.http.routers.omadactl.tls=true"
-      - "traefik.http.routers.omadactl.tls.certresolver=${CERT_RESOLVER}" # staging or production
+      - "traefik.http.routers.omadactl.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
       # service: omadactl
       - "traefik.http.services.omadactl.loadbalancer.server.port=8043"
       # middleware: omadactl-headers
-      - "traefik.http.middlewares.omadactl-headers.headers.customrequestheaders.host=${DOMAIN}:8043"
-      - "traefik.http.middlewares.omadactl-headers.headers.customresponseheaders.host=${DOMAIN}"
+      - "traefik.http.middlewares.omadactl-headers.headers.customrequestheaders.host=${DOMAIN_OMADA:-omada.pixelstack.live}:8043"
+      - "traefik.http.middlewares.omadactl-headers.headers.customresponseheaders.host=${DOMAIN_OMADA:-omada.pixelstack.live}"
       # middleware: omadactl-redirect
       - "traefik.http.middlewares.omadactl-redirect.redirectregex.regex=^https:\\/\\/([^\\/]+)\\/?$$"
       - "traefik.http.middlewares.omadactl-redirect.redirectregex.replacement=https://$$1/login"
@@ -71,12 +71,12 @@ services:
       - homepage.group=Networking
       - homepage.name=Omada
       - homepage.icon=omada
-      - homepage.href=https://${DOMAIN}
+      - homepage.href=https://${DOMAIN_OMADA:-omada.pixelstack.live}
       - homepage.description=Network Management
       - homepage.weight=10
       - homepage.widget.type=omada
       - homepage.widget.fields=["connectedAp", "activeUser", "alerts", "connectedGateways", "connectedSwitches"]
-      - homepage.widget.url=https://${DOMAIN}
+      - homepage.widget.url=https://${DOMAIN_OMADA:-omada.pixelstack.live}
       - homepage.widget.username=${HOMEPAGE_VAR_OMADA_USERNAME}
       - homepage.widget.password=${HOMEPAGE_VAR_OMADA_PASSWORD}
       - homepage.widget.site=${HOMEPAGE_VAR_OMADA_SITENAME}

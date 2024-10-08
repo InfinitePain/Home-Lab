@@ -24,15 +24,14 @@ services:
       - /etc/localtime:/etc/localtime:ro
 #      - /etc/hosts:/etc/hosts:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ${DIR_PORTAINER_DATA:-${DIR_DATA:+${DIR_DATA}/portainer-data:-./portainer-data}}:/data
-
+      - ${DIR_DATA}/portainer-data:/data
     labels:
       # Traefik 2.0
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       # router: portainer-frontend
       - "traefik.http.routers.portainer-frontend.entrypoints=https"
-      - "traefik.http.routers.portainer-frontend.rule=Host(`${DOMAIN_PORTAINER:-${DOMAIN:+portainer.${DOMAIN}:-portainer.pixelstack.live}}`)"
+      - "traefik.http.routers.portainer-frontend.rule=Host(`${DOMAIN_PORTAINER:-portainer.pixelstack.live}}`)"
       - "traefik.http.routers.portainer-frontend.middlewares=secured@file"
       - "traefik.http.routers.portainer-frontend.service=portainer-frontend"
       - "traefik.http.routers.portainer-frontend.tls=true"
@@ -50,7 +49,7 @@ services:
       - homepage.group=Management
       - homepage.name=Portainer
       - homepage.icon=portainer
-      - homepage.href=https://${DOMAIN_PORTAINER:-${DOMAIN:+portainer.${DOMAIN}:-portainer.pixelstack.live}}
+      - homepage.href=https://${DOMAIN_PORTAINER:-portainer.pixelstack.live}}
       - homepage.description=Docker Management UI
       - homepage.weight=10
 
@@ -78,8 +77,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ${FILE_TRAEFIK_CNF_EXTRA:-${DIR_DATA:+${DIR_DATA}/traefik-data/traefik_extra.yml:-./traefik-data/traefik_extra.yml}}:/traefik_extra.yml:ro
-      - ${FILE_TRAEFIK_ACME:-${DIR_DATA:+${DIR_DATA}/traefik-data/acme.json:-./traefik-data/acme.json}}:/acme.json
+      - ${DIR_DATA}/traefik-data/traefik_extra.yml:/traefik_extra.yml:ro
+      - ${DIR_DATA}/traefik-data/acme.json:/acme.json
 #      - ${DIR_AUTH}:/certs/auth
     command:
       # log
@@ -127,7 +126,7 @@ services:
       - "traefik.enable=true"
       # router: traefik
       - "traefik.http.routers.traefik.entrypoints=https"
-      - "traefik.http.routers.traefik.rule=Host(`${DOMAIN_TRAEFIK:-${DOMAIN:+traefik.${DOMAIN}:-traefik.pixelstack.live}}`)"
+      - "traefik.http.routers.traefik.rule=Host(`${DOMAIN_TRAEFIK:-traefik.pixelstack.live}}`)"
       - "traefik.http.routers.traefik.middlewares=default-whitelist@file,authentik@file,sslheader"
 #      - "traefik.http.routers.traefik.middlewares=default-whitelist@file,traefik-auth,sslheader"
       - "traefik.http.routers.traefik.service=api@internal"

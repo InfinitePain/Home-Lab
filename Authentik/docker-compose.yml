@@ -23,7 +23,7 @@ services:
       POSTGRES_USER: ${DB_USER:-authentik}
       POSTGRES_PASSWORD: ${DB_PASS:?database password required}
     volumes:
-      - ${DIR_DB_DATA:-${DIR_DATA:+${DIR_DATA}/db-data:-./db-data}}:/var/lib/postgresql/data
+      - ${DIR_DATA}/db-data:/var/lib/postgresql/data
 
   valkey:
     image: valkey/valkey:8.0.1-alpine
@@ -39,7 +39,7 @@ services:
       retries: 5
       timeout: 3s
     volumes:
-      - ${DIR_VALKEY_DATA:-${DIR_DATA:+${DIR_DATA}/valkey-data:-./valkey-data}}:/data
+      - ${DIR_DATA}/valkey-data:/data
 
   auth-server:
     image: ghcr.io/goauthentik/server:2024.2.2
@@ -69,15 +69,15 @@ services:
       AUTHENTIK_EMAIL__TIMEOUT: 10
       AUTHENTIK_EMAIL__FROM: ${AUTHENTIK_EMAIL_FROM}
     volumes:
-      - ${DIR_AUTHENTIK_MEDIA:-${DIR_DATA:+${DIR_DATA}/authentik/media:-./authentik/media}}:/media
-      - ${DIR_AUTHENTIK_TEMPLATES:-${DIR_DATA:+${DIR_DATA}/authentik/templates:-./authentik/templates}}:/templates
+      - ${DIR_DATA}/authentik-data/media:/media
+      - ${DIR_DATA}/authentik-data/templates:/templates
     labels:
       # Traefik 2.0
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       # router: authentik
       - "traefik.http.routers.authentik.entrypoints=https"
-      - "traefik.http.routers.authentik.rule=Host(`${DOMAIN_AUTHENTIK:-${DOMAIN:+authentik.${DOMAIN}:-authentik.pixelstack.live}}`)"
+      - "traefik.http.routers.authentik.rule=Host(`${DOMAIN_AUTHENTIK:-authentik.pixelstack.live}`)"
       - "traefik.http.routers.authentik.service=authentik"
       - "traefik.http.routers.authentik.tls=true"
       - "traefik.http.routers.authentik.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
@@ -87,12 +87,12 @@ services:
       - homepage.group=Management
       - homepage.name=Authentik
       - homepage.icon=mdi-key
-      - homepage.href=https://${DOMAIN_AUTHENTIK:-${DOMAIN:+authentik.${DOMAIN}:-authentik.pixelstack.live}}
+      - homepage.href=https://${DOMAIN_AUTHENTIK:-authentik.pixelstack.live}}
       - homepage.description=User Management
       - homepage.weight=20
       - homepage.widget.type=authentik
       - homepage.widget.fields=["users", "loginsLast24H", "failedLoginsLast24H"]
-      - homepage.widget.url=https://${DOMAIN_AUTHENTIK:-${DOMAIN:+authentik.${DOMAIN}:-authentik.pixelstack.live}}
+      - homepage.widget.url=https://${DOMAIN_AUTHENTIK:-authentik.pixelstack.live}}
       - homepage.widget.key=${HOMEPAGE_VAR_AUTHENTIK_KEY}
 
   auth-worker:
@@ -120,9 +120,9 @@ services:
       AUTHENTIK_EMAIL__TIMEOUT: 10
       AUTHENTIK_EMAIL__FROM: ${AUTHENTIK_EMAIL_FROM}
     volumes:
-      - ${DIR_AUTHENTIK_MEDIA:-${DIR_DATA:+${DIR_DATA}/authentik/media:-./authentik/media}}:/media
-      - ${DIR_AUTHENTIK_TEMPLATES:-${DIR_DATA:+${DIR_DATA}/authentik/templates:-./authentik/templates}}:/templates
-      - ${DIR_AUTHENTIK_CERTS:-${DIR_DATA:+${DIR_DATA}/authentik/certs:-./authentik/certs}}:/certs
+      - ${DIR_DATA}/authentik/media:/media
+      - ${DIR_DATA}/authentik/templates:/templates
+      - ${DIR_DATA}/authentik/certs:/certs
 
   auth-ldap:
     image: ghcr.io/goauthentik/ldap:2024.2.2
@@ -143,7 +143,7 @@ services:
       - "traefik.docker.network=proxy"
       # router: auth-ldap
       - "traefik.tcp.routers.auth-ldap.entrypoints=auth-ldap"
-      - "traefik.tcp.routers.auth-ldap.rule=HostSNI(`${DOMAIN_AUTHENTIK_LDAP:-${DOMAIN:+ldap.${DOMAIN}:-ldap.pixelstack.live}}`)"
+      - "traefik.tcp.routers.auth-ldap.rule=HostSNI(`${DOMAIN_AUTHENTIK_LDAP:-ldap.pixelstack.live}}`)"
       - "traefik.tcp.routers.auth-ldap.middlewares=default-whitelist@file"
       - "traefik.tcp.routers.auth-ldap.service=auth-ldap"
       - "traefik.tcp.routers.auth-ldap.tls=true"

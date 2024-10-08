@@ -14,52 +14,32 @@ services:
       timeout: 30s
       retries: 3
       start_period: 10s
-    # by id as these may not exist within the container. 
-    # Needed to provide permissions to the VAAPI Devices
-    group_add: 
-      - '107' # render
-      - '44' # video
-    network_mode: 'host' # Needed for DLNA
-    # ports:
-    #   - 8096:8096 # Http webUI
+    network_mode: 'host'
+    ports:
+      - 8096:8096 # Http webUI
     #   - 8920:8920 # Https webUI (certificate required)
     #   - 7359:7359/udp # Jellyfin local network discovery
     #   - 1900:1900/udp # DNLA/service discovery
     environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
-      TZ: ${TZ}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-Europe/Berlin}
     devices:
-      - "/dev/video10:/dev/video10"
-      - "/dev/video11:/dev/video11"
-      - "/dev/video12:/dev/video12"
-      - "/dev/video13:/dev/video13"
-      - "/dev/video14:/dev/video14"
-      - "/dev/video15:/dev/video15"
-      - "/dev/video16:/dev/video16"
-      - "/dev/video18:/dev/video18"
-      - "/dev/video19:/dev/video19"
-      - "/dev/video20:/dev/video20"
-      - "/dev/video21:/dev/video21"
-      - "/dev/video22:/dev/video22"
-      - "/dev/video23:/dev/video23"
-      - "/dev/video31:/dev/video31"
-      - "/dev/media1:/dev/media1"
-      - "/dev/media2:/dev/media2"
-      - "/dev/media3:/dev/media3"
+      - /dev/dri:/dev/dri
     volumes:
       - /etc/hosts:/etc/hosts:ro
-      - "${DIR_CONFIG}:/config"
-      - "${DIR_CACHE}:/cache"
-      - "${DIR_MEDIA}:/media"
+      -  ${DIR_DATA}/jellyfin-data/cache:-./jellyfin-data/cache:/cache
+      -  ${DIR_DATA}/jellyfin-data/config:-./jellyfin-data/config:/config
+      - "${DIR_MOVIES}:/media/movies"
+      - "${DIR_SERIES}:/media/series"
     labels:
       # Traefik 2.0
       - "traefik.enable=true"
       # router: jellyfin
       - "traefik.http.routers.jellyfin.entrypoints=https"
-      - "traefik.http.routers.jellyfin.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.jellyfin.rule=Host(`${DOMAIN_JELLYFIN:-jellyfin.pixelstack.live}`)"
       - "traefik.http.routers.jellyfin.middlewares=jellyfin-headers,default-whitelist@file"
-      - "traefik.http.routers.jellyfin.service=jellyfin@file"
+      - "traefik.http.routers.jellyfin.service=jellyfin"
       - "traefik.http.routers.jellyfin.tls=true"
       - "traefik.http.routers.jellyfin.tls.certresolver=${CERT_RESOLVER}" # staging or production
       # service: jellyfin
@@ -81,12 +61,12 @@ services:
       - homepage.group=Services
       - homepage.name=Jellyfin
       - homepage.icon=jellyfin
-      - homepage.href=https://${DOMAIN}
+      - homepage.href=https://${DOMAIN_JELLYFIN:-jellyfin.pixelstack.live}
       - homepage.description=Media Server
       - homepage.weight=20
       - homepage.widget.type=jellyfin
       - homepage.widget.fields=["movies", "series", "episodes", "songs"]
-      - homepage.widget.url=https://${DOMAIN}
+      - homepage.widget.url=https://${DOMAIN_JELLYFIN:-jellyfin.pixelstack.live}
       - homepage.widget.key=${HOMEPAGE_VAR_JELLYFIN_KEY}
       - homepage.widget.enableBlocks=true
       - homepage.widget.enableNowPlaying=true

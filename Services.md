@@ -3,8 +3,8 @@
 | Service          | Port  | TLS |       Proxy domain        |
 |:-----------------|:-----:|:---:|:-------------------------:|
 | Omada-Controller | 8043  |  ✓  |   omadactl.example.com    |
-| CasaOS           | 8081  |  ✗  |    casaos.example.com     |
-| Filebrowser      | 8082  |  ✗  |  filebrowser.example.com  |
+| TrueNAS HTTP     | 8081  |  ✗  |    truenas.example.com    |
+| TrueNAS HTTPS    | 8082  |  ✗  |    truenas.example.com    |
 | Nextcloud        | 8083  |  ✗  |   nextcloud.example.com   |
 | Pi-hole          | 8084  |  ✗  |    pihole.example.com     |
 | PgAdmin          | 8085  |  ✗  |    pgadmin.example.com    |
