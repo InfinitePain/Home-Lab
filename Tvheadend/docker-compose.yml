@@ -9,9 +9,9 @@ services:
     container_name: tvheadend
     restart: always
     network_mode: host
-    ports:
-      - 9981:9981
-      - 9982:9982
+    # ports:
+    #  - 9981:9981
+    #  - 9982:9982
     environment:
       PUID: ${PUID:-1000}
       PGID: ${PGID:-1000}
