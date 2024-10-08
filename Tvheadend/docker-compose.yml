@@ -21,4 +21,4 @@ services:
       INSTALL_PIP_PACKAGES: setuptools|wheel|versioningit|certifi|isodate|pycountry|pycryptodome|pysocks|requests|trio|trio-websocket|typing_extensions|urllib3|websocket-client|streamlink
 #      RUN_OPTS: --noacl
     volumes:
-      - ${DIR_DATA}/tvheadend-config:/config
+      - ${DIR_DATA}/tvheadend-data/config:/config
