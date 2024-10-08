@@ -31,7 +31,7 @@ services:
       - "traefik.docker.network=proxy"
       # router: portainer-frontend
       - "traefik.http.routers.portainer-frontend.entrypoints=https"
-      - "traefik.http.routers.portainer-frontend.rule=Host(`${DOMAIN_PORTAINER:-portainer.pixelstack.live}}`)"
+      - "traefik.http.routers.portainer-frontend.rule=Host(`${DOMAIN_PORTAINER:-portainer.pixelstack.live}`)"
       - "traefik.http.routers.portainer-frontend.middlewares=secured@file"
       - "traefik.http.routers.portainer-frontend.service=portainer-frontend"
       - "traefik.http.routers.portainer-frontend.tls=true"
@@ -49,7 +49,7 @@ services:
       - homepage.group=Management
       - homepage.name=Portainer
       - homepage.icon=portainer
-      - homepage.href=https://${DOMAIN_PORTAINER:-portainer.pixelstack.live}}
+      - homepage.href=https://${DOMAIN_PORTAINER:-portainer.pixelstack.live}
       - homepage.description=Docker Management UI
       - homepage.weight=10
 

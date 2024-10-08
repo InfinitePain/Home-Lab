@@ -31,7 +31,7 @@ services:
       - "traefik.docker.network=proxy"
       # router: pihole-rewrite
       - "traefik.http.routers.pihole-rewrite.entrypoints=https"
-      - "traefik.http.routers.pihole-rewrite.rule=Host(`${DOMAIN_PIHOLE:-pihole.pixelstack.live}}`) && !PathPrefix(`/admin`)"
+      - "traefik.http.routers.pihole-rewrite.rule=Host(`${DOMAIN_PIHOLE:-pihole.pixelstack.live}`) && !PathPrefix(`/admin`)"
       - "traefik.http.routers.pihole-rewrite.middlewares=addprefix-pihole,secured@file"
       - "traefik.http.routers.pihole-rewrite.tls=true"
       - "traefik.http.routers.pihole-rewrite.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
@@ -49,8 +49,8 @@ services:
       # middleware: addprefix-pihole
       - "traefik.http.middlewares.addprefix-pihole.addprefix.prefix=/admin"
       # middleware: redirectregex-pihole
-      - "traefik.http.middlewares.redirectregex-pihole.redirectregex.regex=^https://${DOMAIN_PIHOLE:-pihole.pixelstack.live}}/admin(.*)"
-      - "traefik.http.middlewares.redirectregex-pihole.redirectregex.replacement=https://${DOMAIN_PIHOLE:-pihole.pixelstack.live}}$${1}"
+      - "traefik.http.middlewares.redirectregex-pihole.redirectregex.regex=^https://${DOMAIN_PIHOLE:-pihole.pixelstack.live}/admin(.*)"
+      - "traefik.http.middlewares.redirectregex-pihole.redirectregex.replacement=https://${DOMAIN_PIHOLE:-pihole.pixelstack.live}$${1}"
       # Homepage Dashboard
       - homepage.group=Networking
       - homepage.name=PiHole
@@ -60,6 +60,6 @@ services:
       - homepage.weight=20
       - homepage.widget.type=pihole
       - homepage.widget.fields=["queries", "blocked", "blocked_percent", "gravity"]
-      - homepage.widget.url=https://${DOMAIN_PIHOLE:-pihole.pixelstack.live}}
+      - homepage.widget.url=https://${DOMAIN_PIHOLE:-pihole.pixelstack.live}
       - homepage.widget.version=5
       - homepage.widget.key=${HOMEPAGE_VAR_PIHOLE_KEY}

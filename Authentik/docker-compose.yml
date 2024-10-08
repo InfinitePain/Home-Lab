@@ -87,7 +87,7 @@ services:
       - homepage.group=Management
       - homepage.name=Authentik
       - homepage.icon=mdi-key
-      - homepage.href=https://${DOMAIN_AUTHENTIK:-authentik.pixelstack.live}}
+      - homepage.href=https://${DOMAIN_AUTHENTIK:-authentik.pixelstack.live}
       - homepage.description=User Management
       - homepage.weight=20
       - homepage.widget.type=authentik
@@ -143,7 +143,7 @@ services:
       - "traefik.docker.network=proxy"
       # router: auth-ldap
       - "traefik.tcp.routers.auth-ldap.entrypoints=auth-ldap"
-      - "traefik.tcp.routers.auth-ldap.rule=HostSNI(`${DOMAIN_AUTHENTIK_LDAP:-ldap.pixelstack.live}}`)"
+      - "traefik.tcp.routers.auth-ldap.rule=HostSNI(`${DOMAIN_AUTHENTIK_LDAP:-ldap.pixelstack.live}`)"
       - "traefik.tcp.routers.auth-ldap.middlewares=default-whitelist@file"
       - "traefik.tcp.routers.auth-ldap.service=auth-ldap"
       - "traefik.tcp.routers.auth-ldap.tls=true"
