@@ -13,9 +13,12 @@ services:
       - 9981:9981
       - 9982:9982
     environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
-      TZ: ${TZ}
+      PUID: ${PUID:1000}
+      PGID: ${PGID:1000}
+      TZ: ${TZ:-Europe/Berlin}
+      DOCKER_MODS: linuxserver/mods:universal-package-install
+      INSTALL_PACKAGES: python3|python3-pip|python3-venv|libxml2-dev|libxslt-dev
+      INSTALL_PIP_PACKAGES: setuptools|wheel|versioningit|certifi|isodate|pycountry|pycryptodome|pysocks|requests|trio|trio-websocket|typing_extensions|urllib3|websocket-client|streamlink
 #      RUN_OPTS: --noacl
     volumes:
-      - ${DIR_CONFIG}:/config
+      - ${DIR_TVHEADEND_CONFIG:-${DIR_DATA:+${DIR_DATA}/tvheadend-config:-./tvheadend-config}}:/config

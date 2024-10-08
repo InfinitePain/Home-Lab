@@ -17,47 +17,49 @@ services:
     #   - "67:67/udp" # DHCP
     #   - "${PORT}:${PORT}/tcp" # WebUI
     environment:
-      TZ: ${TZ}
+      TZ: ${TZ:-Europe/Berlin}
       WEBPASSWORD: ${WEBPASSWORD}
-      WEB_PORT: ${PORT}
+      WEB_PORT: ${PORT:-80}
+      PIHOLE_DNS_: "1.1.1.1;1.0.0.1"
     volumes:
-      - "${DIR_ETC_PIHOLE}:/etc/pihole"
-      - "${DIR_ETC_DNSMASQ_D}:/etc/dnsmasq.d"
+      - ${DIR_PIHOLE_DATA:-${DIR_DATA:+${DIR_DATA}/pihole/data:-./pihole/data}}:/etc/pihole
+      - ${DIR_PIHOLE_DNSMASQ:-${DIR_DATA:+${DIR_DATA}/pihole/dnsmasq.d:-./pihole/dnsmasq.d}}:/etc/dnsmasq.d
+
     labels:
       # Traefik 2.0
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       # router: pihole-rewrite
       - "traefik.http.routers.pihole-rewrite.entrypoints=https"
-      - "traefik.http.routers.pihole-rewrite.rule=Host(`${DOMAIN}`) && !PathPrefix(`/admin`)"
+      - "traefik.http.routers.pihole-rewrite.rule=Host(`${DOMAIN_PIHOLE:-${DOMAIN:+pihole.${DOMAIN}:-pihole.pixelstack.live}}`) && !PathPrefix(`/admin`)"
       - "traefik.http.routers.pihole-rewrite.middlewares=addprefix-pihole,secured@file"
       - "traefik.http.routers.pihole-rewrite.tls=true"
-      - "traefik.http.routers.pihole-rewrite.tls.certresolver=${CERT_RESOLVER}" # staging or production
+      - "traefik.http.routers.pihole-rewrite.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
       - "traefik.http.routers.pihole-rewrite.service=pihole@file"
       # router: pihole-redirect
       - "traefik.http.routers.pihole-redirect.entrypoints=https"
-      - "traefik.http.routers.pihole-redirect.rule=Host(`${DOMAIN}`) && PathPrefix(`/admin`)"
+      - "traefik.http.routers.pihole-redirect.rule=Host(`${DOMAIN_PIHOLE:-${DOMAIN:+pihole.${DOMAIN}:-pihole.pixelstack.live}}`) && PathPrefix(`/admin`)"
       - "traefik.http.routers.pihole-redirect.middlewares=redirectregex-pihole,secured@file"
       - "traefik.http.routers.pihole-redirect.tls=true"
-      - "traefik.http.routers.pihole-redirect.tls.certresolver=${CERT_RESOLVER}" # staging or production
+      - "traefik.http.routers.pihole-redirect.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
       - "traefik.http.routers.pihole-redirect.service=pihole@file"
       - "traefik.http.routers.pihole-redirect.priority=1000"
       # service: pihole
-      - "traefik.http.services.pihole.loadbalancer.server.port=${PORT}"
+      - "traefik.http.services.pihole.loadbalancer.server.port=${PORT:-80}"
       # middleware: addprefix-pihole
       - "traefik.http.middlewares.addprefix-pihole.addprefix.prefix=/admin"
       # middleware: redirectregex-pihole
-      - "traefik.http.middlewares.redirectregex-pihole.redirectregex.regex=^https://${DOMAIN}/admin(.*)"
-      - "traefik.http.middlewares.redirectregex-pihole.redirectregex.replacement=https://${DOMAIN}$${1}"
+      - "traefik.http.middlewares.redirectregex-pihole.redirectregex.regex=^https://${DOMAIN_PIHOLE:-${DOMAIN:+pihole.${DOMAIN}:-pihole.pixelstack.live}}/admin(.*)"
+      - "traefik.http.middlewares.redirectregex-pihole.redirectregex.replacement=https://${DOMAIN_PIHOLE:-${DOMAIN:+pihole.${DOMAIN}:-pihole.pixelstack.live}}$${1}"
       # Homepage Dashboard
       - homepage.group=Networking
       - homepage.name=PiHole
       - homepage.icon=pi-hole
-      - homepage.href=https://${DOMAIN}
+      - homepage.href=https://${DOMAIN_PIHOLE:-${DOMAIN:+pihole.${DOMAIN}:-pihole.pixelstack.live}}
       - homepage.description=DNS, Network Ad-Blocker
       - homepage.weight=20
       - homepage.widget.type=pihole
       - homepage.widget.fields=["queries", "blocked", "blocked_percent", "gravity"]
-      - homepage.widget.url=https://${DOMAIN}
+      - homepage.widget.url=https://${DOMAIN_PIHOLE:-${DOMAIN:+pihole.${DOMAIN}:-pihole.pixelstack.live}}
       - homepage.widget.version=5
       - homepage.widget.key=${HOMEPAGE_VAR_PIHOLE_KEY}

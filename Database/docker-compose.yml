@@ -26,16 +26,16 @@ services:
       POSTGRES_PASSWORD: ${PASS_DB}
     volumes:
       - ${DIR_DB_DATA}:/var/lib/postgresql/data
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      # router: postresql
-      - "traefik.tcp.routers.postgresql.entrypoints=postgres"
-      - "traefik.tcp.routers.postgresql.rule=HostSNI(`*`)"
-      - "traefik.tcp.routers.postgresql.middlewares=default-whitelist@file"
-      - "traefik.tcp.routers.postgresql.service=postgresql"
-      # service: postgresql
-      - "traefik.tcp.services.postgresql.loadbalancer.server.port=5432"
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.docker.network=proxy"
+#      # router: postresql
+#      - "traefik.tcp.routers.postgresql.entrypoints=postgres"
+#      - "traefik.tcp.routers.postgresql.rule=HostSNI(`*`)"
+#      - "traefik.tcp.routers.postgresql.middlewares=default-whitelist@file"
+#      - "traefik.tcp.routers.postgresql.service=postgresql"
+#      # service: postgresql
+#      - "traefik.tcp.services.postgresql.loadbalancer.server.port=5432"
 
   pgadmin:
     image: dpage/pgadmin4:8.4

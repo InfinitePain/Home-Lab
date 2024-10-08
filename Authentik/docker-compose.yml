@@ -4,21 +4,42 @@
 version: '3'
 
 services:
-  redis:
-    image: docker.io/library/redis:7.2.4-alpine
-    container_name: redis
+  postgresql:
+    image: docker.io/library/postgres:12.18-alpine3.19
+    container_name: postgresql
+    restart: always
+    networks:
+      - proxy
+    # ports:
+    #   - 5432:5432  
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    environment:
+      POSTGRES_DB: ${DB_NAME:-authentik}
+      POSTGRES_USER: ${DB_USER:-authentik}
+      POSTGRES_PASSWORD: ${DB_PASS:?database password required}
+    volumes:
+      - ${DIR_DB_DATA:-${DIR_DATA:+${DIR_DATA}/db-data:-./db-data}}:/var/lib/postgresql/data
+
+  valkey:
+    image: valkey/valkey:8.0.1-alpine
+    container_name: valkey
     command: --save 60 1 --loglevel warning
     restart: always
     networks:
       - proxy
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      test: ["CMD-SHELL", "valkey-cli ping | grep PONG"]
       start_period: 20s
       interval: 30s
       retries: 5
       timeout: 3s
     volumes:
-      - ${DIR_REDIS_DATA}:/data
+      - ${DIR_VALKEY_DATA:-${DIR_DATA:+${DIR_DATA}/valkey-data:-./valkey-data}}:/data
 
   auth-server:
     image: ghcr.io/goauthentik/server:2024.2.2
@@ -33,11 +54,11 @@ services:
     #   - "8086:9000"
     #   - "8087:9443"
     environment:
-      AUTHENTIK_REDIS__HOST: redis
-      AUTHENTIK_POSTGRESQL__HOST: ${POSTGRES_HOST}
-      AUTHENTIK_POSTGRESQL__USER: ${POSTGRES_USER}
-      AUTHENTIK_POSTGRESQL__NAME: ${POSTGRES_DB}
-      AUTHENTIK_POSTGRESQL__PASSWORD: ${POSTGRES_PASSWORD}
+      AUTHENTIK_REDIS__HOST: valkey
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: ${DB_USER:-authentik}
+      AUTHENTIK_POSTGRESQL__NAME: ${DB_NAME:-authentik}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${DB_PASS}
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
       AUTHENTIK_EMAIL__HOST: ${AUTHENTIK_EMAIL_HOST}
       AUTHENTIK_EMAIL__PORT: ${AUTHENTIK_EMAIL_PORT}
@@ -48,30 +69,30 @@ services:
       AUTHENTIK_EMAIL__TIMEOUT: 10
       AUTHENTIK_EMAIL__FROM: ${AUTHENTIK_EMAIL_FROM}
     volumes:
-      - ${DIR_MEDIA}:/media
-      - ${DIR_TEMPLATES}:/templates
+      - ${DIR_AUTHENTIK_MEDIA:-${DIR_DATA:+${DIR_DATA}/authentik/media:-./authentik/media}}:/media
+      - ${DIR_AUTHENTIK_TEMPLATES:-${DIR_DATA:+${DIR_DATA}/authentik/templates:-./authentik/templates}}:/templates
     labels:
       # Traefik 2.0
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       # router: authentik
       - "traefik.http.routers.authentik.entrypoints=https"
-      - "traefik.http.routers.authentik.rule=Host(`${DOMAIN_AUTHENTIK}`)"
+      - "traefik.http.routers.authentik.rule=Host(`${DOMAIN_AUTHENTIK:-${DOMAIN:+authentik.${DOMAIN}:-authentik.pixelstack.live}}`)"
       - "traefik.http.routers.authentik.service=authentik"
       - "traefik.http.routers.authentik.tls=true"
-      - "traefik.http.routers.authentik.tls.certresolver=${CERT_RESOLVER}" # staging or production
+      - "traefik.http.routers.authentik.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
       # service: authentik
       - "traefik.http.services.authentik.loadbalancer.server.port=9000"
       # Homepage Dashboard
       - homepage.group=Management
       - homepage.name=Authentik
       - homepage.icon=mdi-key
-      - homepage.href=https://${DOMAIN_AUTHENTIK}
+      - homepage.href=https://${DOMAIN_AUTHENTIK:-${DOMAIN:+authentik.${DOMAIN}:-authentik.pixelstack.live}}
       - homepage.description=User Management
       - homepage.weight=20
       - homepage.widget.type=authentik
       - homepage.widget.fields=["users", "loginsLast24H", "failedLoginsLast24H"]
-      - homepage.widget.url=https://${DOMAIN_AUTHENTIK}
+      - homepage.widget.url=https://${DOMAIN_AUTHENTIK:-${DOMAIN:+authentik.${DOMAIN}:-authentik.pixelstack.live}}
       - homepage.widget.key=${HOMEPAGE_VAR_AUTHENTIK_KEY}
 
   auth-worker:
@@ -99,9 +120,9 @@ services:
       AUTHENTIK_EMAIL__TIMEOUT: 10
       AUTHENTIK_EMAIL__FROM: ${AUTHENTIK_EMAIL_FROM}
     volumes:
-      - ${DIR_MEDIA}:/media
-      - ${DIR_TEMPLATES}:/templates
-      - ${DIR_CERTS}:/certs
+      - ${DIR_AUTHENTIK_MEDIA:-${DIR_DATA:+${DIR_DATA}/authentik/media:-./authentik/media}}:/media
+      - ${DIR_AUTHENTIK_TEMPLATES:-${DIR_DATA:+${DIR_DATA}/authentik/templates:-./authentik/templates}}:/templates
+      - ${DIR_AUTHENTIK_CERTS:-${DIR_DATA:+${DIR_DATA}/authentik/certs:-./authentik/certs}}:/certs
 
   auth-ldap:
     image: ghcr.io/goauthentik/ldap:2024.2.2
@@ -122,11 +143,11 @@ services:
       - "traefik.docker.network=proxy"
       # router: auth-ldap
       - "traefik.tcp.routers.auth-ldap.entrypoints=auth-ldap"
-      - "traefik.tcp.routers.auth-ldap.rule=HostSNI(`${DOMAIN_LDAP}`)"
+      - "traefik.tcp.routers.auth-ldap.rule=HostSNI(`${DOMAIN_AUTHENTIK_LDAP:-${DOMAIN:+ldap.${DOMAIN}:-ldap.pixelstack.live}}`)"
       - "traefik.tcp.routers.auth-ldap.middlewares=default-whitelist@file"
       - "traefik.tcp.routers.auth-ldap.service=auth-ldap"
       - "traefik.tcp.routers.auth-ldap.tls=true"
-      - "traefik.tcp.routers.auth-ldap.tls.certresolver=${CERT_RESOLVER}" # staging or production
+      - "traefik.tcp.routers.auth-ldap.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
       # service: auth-ldap
       - "traefik.tcp.services.auth-ldap.loadbalancer.server.port=3389"
 

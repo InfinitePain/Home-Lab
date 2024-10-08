@@ -1,0 +1,143 @@
+# Title: Portainer
+# Description: A lightweight Docker management UI.
+
+version: '3'
+
+services:
+  portainer:
+    image: portainer/portainer-ce:2.20.1-alpine
+    container_name: portainer
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9000"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - proxy
+    # ports:
+    #   - 9000:9000
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+#      - /etc/hosts:/etc/hosts:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${DIR_PORTAINER_DATA:-${DIR_DATA:+${DIR_DATA}/portainer-data:-./portainer-data}}:/data
+
+    labels:
+      # Traefik 2.0
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      # router: portainer-frontend
+      - "traefik.http.routers.portainer-frontend.entrypoints=https"
+      - "traefik.http.routers.portainer-frontend.rule=Host(`${DOMAIN_PORTAINER:-${DOMAIN:+portainer.${DOMAIN}:-portainer.pixelstack.live}}`)"
+      - "traefik.http.routers.portainer-frontend.middlewares=secured@file"
+      - "traefik.http.routers.portainer-frontend.service=portainer-frontend"
+      - "traefik.http.routers.portainer-frontend.tls=true"
+      - "traefik.http.routers.portainer-frontend.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
+      # router: portainer-edge
+      # - "traefik.http.routers.portainer-edge.entrypoints=https"
+      # - "traefik.http.routers.portainer-edge.rule=Host(`${DOMAIN}`)"
+      # - "traefik.http.routers.portainer-edge.service=portainer-edge"
+      # - "traefik.http.routers.portainer-edge.tls=true"
+      # - "traefik.http.routers.portainer-edge.tls.certresolver=${CERT_RESOLVER}" # staging or production
+      # service: portainer
+      # - "traefik.http.services.portainer-frontend.loadbalancer.server.port=9000"
+      # - "traefik.http.services.portainer-edge.loadbalancer.server.port=8000"
+      # Homepage Dashboard
+      - homepage.group=Management
+      - homepage.name=Portainer
+      - homepage.icon=portainer
+      - homepage.href=https://${DOMAIN_PORTAINER:-${DOMAIN:+portainer.${DOMAIN}:-portainer.pixelstack.live}}
+      - homepage.description=Docker Management UI
+      - homepage.weight=10
+
+  traefik:
+    image: traefik:v2.11.0
+    container_name: traefik
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 5s
+      timeout: 1s
+      retries: 3
+      start_period: 10s
+    networks:
+      - proxy
+    ports:
+      - 80:80
+      - 443:443
+#      - 5432:5432
+      - 636:636
+    environment:
+      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN:?cloudflare token required}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${FILE_TRAEFIK_CNF_EXTRA:-${DIR_DATA:+${DIR_DATA}/traefik-data/traefik_extra.yml:-./traefik-data/traefik_extra.yml}}:/traefik_extra.yml:ro
+      - ${FILE_TRAEFIK_ACME:-${DIR_DATA:+${DIR_DATA}/traefik-data/acme.json:-./traefik-data/acme.json}}:/acme.json
+#      - ${DIR_AUTH}:/certs/auth
+    command:
+      # log
+      # By default, the level is set to ERROR. Alternative logging levels
+      # are DEBUG, PANIC, FATAL, ERROR, WARN, and INFO.
+      - "--log=true"
+      - "--log.level=INFO"
+      # - "--log.filePath=/traefik.log"
+      # api
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--api.debug=false"
+      - "--ping=true"
+      # entryPoints
+      # entryPoints.http
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.http.http.redirections.entryPoint.to=https"
+      - "--entrypoints.http.http.redirections.entryPoint.scheme=https"
+      # entryPoints.https
+      - "--entrypoints.https.address=:443"
+#      # entryPoints.postgres
+#      - "--entrypoints.postgres.address=:5432"
+      # entryPoints.auth-ldap
+      - "--entrypoints.auth-ldap.address=:636"
+      # serversTransport
+      - "--serversTransport.insecureSkipVerify=true"
+      # providers
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.exposedByDefault=false"
+      - "--providers.file.filename=/traefik_extra.yml"
+      # certificatesResolvers
+      # certificatesResolvers.staging
+      - "--certificatesResolvers.staging.acme.email=${EMAIL:?cloudflare email required}"
+      - "--certificatesResolvers.staging.acme.storage=/acme.json"
+      - "--certificatesResolvers.staging.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesResolvers.staging.acme.dnsChallenge.provider=cloudflare"
+      - "--certificatesResolvers.staging.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
+      # certificatesResolvers.production
+      - "--certificatesResolvers.production.acme.email=${EMAIL}"
+      - "--certificatesResolvers.production.acme.storage=/acme.json"
+      - "--certificatesResolvers.production.acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
+      - "--certificatesResolvers.production.acme.dnsChallenge.provider=cloudflare"
+      - "--certificatesResolvers.production.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
+#    labels:
+      - "traefik.enable=true"
+      # router: traefik
+      - "traefik.http.routers.traefik.entrypoints=https"
+      - "traefik.http.routers.traefik.rule=Host(`${DOMAIN_TRAEFIK:-${DOMAIN:+traefik.${DOMAIN}:-traefik.pixelstack.live}}`)"
+      - "traefik.http.routers.traefik.middlewares=default-whitelist@file,authentik@file,sslheader"
+#      - "traefik.http.routers.traefik.middlewares=default-whitelist@file,traefik-auth,sslheader"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
+      # middleware: traefik-auth
+#      - "traefik.http.middlewares.traefik-auth.digestauth.usersFile=/certs/auth/traefik_usersfile"
+      # middleware: sslheader
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+
+networks:
+  proxy:
+    external: true

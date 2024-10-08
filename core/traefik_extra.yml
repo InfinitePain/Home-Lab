@@ -1,25 +1,17 @@
 http:
   services:
-    casaos:
+    truenas:
       loadBalancer:
         servers:
-          - url: "http://192.168.0.11:8081"
-    jellyfin:
-      loadBalancer:
-        servers:
-          - url: "http://192.168.0.11:8096"
+          - url: "https://192.168.0.13:443"
     omadactl:
       loadBalancer:
         servers:
-          - url: "https://192.168.0.11:8043"
+          - url: "https://192.168.0.13:8043"
     pihole:
       loadBalancer:
         servers:
           - url: "http://192.168.0.11:8084"
-    pgadmin:
-      loadBalancer:
-        servers:
-          - url: "http://192.168.0.11:8085"
     wg-portal:
       loadBalancer:
         servers:
@@ -28,13 +20,14 @@ http:
   middlewares:
     default-headers:
       headers:
-        frameDeny: true
         browserXssFilter: true
         contentTypeNosniff: true
         forceSTSHeader: true
         stsIncludeSubdomains: true
         stsPreload: true
         stsSeconds: 15552000
+        referrerPolicy: same-origin
+        contentSecurityPolicy: "default-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https: data:; connect-src 'self' https:; frame-src 'self' https:; media-src 'self' https:; object-src 'none'; frame-ancestors 'self'; base-uri 'self'; form-action 'self';"
         customFrameOptionsValue: SAMEORIGIN
         customRequestHeaders:
           X-Forwarded-Proto: https
@@ -57,7 +50,7 @@ http:
                 - X-authentik-meta-version
 
     default-whitelist:
-      ipWhiteList:
+      ipAllowList:
         sourceRange:
           - "10.0.0.0/8"
           - "192.168.0.0/16"
@@ -89,11 +82,11 @@ tls:
     mintls13:
       minVersion: "VersionTLS13"
 
-tcp:
-  middlewares:
-    default-whitelist:
-      ipWhiteList:
-        sourceRange:
-          - "10.0.0.0/8"
-          - "192.168.0.0/16"
-          - "172.16.0.0/12"
+#tcp:
+#  middlewares:
+#    default-whitelist:
+#      ipWhiteList:
+#        sourceRange:
+#          - "10.0.0.0/8"
+#          - "192.168.0.0/16"
+#          - "172.16.0.0/12"
