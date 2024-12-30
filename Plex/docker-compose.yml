@@ -8,8 +8,8 @@ services:
     image: lscr.io/linuxserver/plex:1.41.3
     container_name: plex
     restart: always
-    ports:
-      - "32400:32400"     # WebUI
+    # ports:
+      # - "32400:32400"     # WebUI
       # - "1900:1900/udp"   # DLNA
       # - "5353:5353/udp"   # Bonjour/Avahi
       # - "8324:8324"       # Plex Companion (Roku)
