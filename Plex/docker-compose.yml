@@ -1,0 +1,43 @@
+# Title: Plex
+# Description: Plex Media Server
+
+version: '3'
+
+services:
+  pihole:
+    image: lscr.io/linuxserver/plex:1.41.3
+    container_name: plex
+    restart: always
+    ports:
+      - "32400:32400"     # WebUI
+      # - "1900:1900/udp"   # DLNA
+      # - "5353:5353/udp"   # Bonjour/Avahi
+      # - "8324:8324"       # Plex Companion (Roku)
+      # - "32410:32410/udp" # GDM Network Discovery
+      # - "32412:32412/udp" # GDM Network Discovery
+      # - "32413:32413/udp" # GDM Network Discovery
+      # - "32414:32414/udp" # GDM Network Discovery
+      # - "32469:32469"     # Plex DLNA Server
+    environment:
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-Europe/Berlin}
+      VERSION: ${VERSION:-docker}
+      PLEX_CLAIM: ${PLEX_CLAIM}
+    volumes:
+      - ${DIR_DATA}/plex-data/config:/config
+      - ${DIR_MOVIES}:/movies
+      - ${DIR_SHOWS}:/tv
+    labels:
+      # Traefik 3.0
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      # router: plex
+      - "traefik.http.routers.plex.entrypoints=https"
+      - "traefik.http.routers.plex.rule=Host(`${DOMAIN_PLEX:-plex.pixelstack.live}`)"
+      - "traefik.http.routers.plex.middlewares=secured@file"
+      - "traefik.http.routers.plex.service=plex"
+      - "traefik.http.routers.plex.tls=true"
+      - "traefik.http.routers.plex.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
+      # service: plex
+      - "traefik.http.services.plex.loadbalancer.server.port=3000"
