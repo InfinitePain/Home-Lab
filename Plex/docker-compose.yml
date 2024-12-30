@@ -28,6 +28,8 @@ services:
       - ${DIR_DATA}/plex-data/config:/config
       - ${DIR_MOVIES}:/movies
       - ${DIR_SHOWS}:/tv
+    devices:
+      - /dev/dri:/dev/dri
     labels:
       # Traefik 3.0
       - "traefik.enable=true"
