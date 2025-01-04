@@ -107,7 +107,7 @@ services:
     networks:
       - proxy
     environment:
-      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_REDIS__HOST: valkey
       AUTHENTIK_POSTGRESQL__HOST: postgresql
       AUTHENTIK_POSTGRESQL__USER: ${DB_USER:-authentik}
       AUTHENTIK_POSTGRESQL__NAME: ${DB_NAME:-authentik}
