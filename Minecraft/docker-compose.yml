@@ -1,0 +1,69 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:1.27.3
+    container_name: nginx
+    restart: always
+    networks:
+      - proxy
+    ports:
+      - 25565:25565
+    volumes:
+      - ${DIR_DATA}/minecraft/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${DIR_DATA}/minecraft/nginx/whitelist.conf:/etc/nginx/whitelist.conf:ro
+      - ${DIR_DATA}/minecraft/nginx/logs:/var/log/nginx
+    labels:
+      # Traefik 3.0
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      # router: minecraft
+      - "traefik.tcp.routers.minecraft.entrypoints=minecraft"
+      - "traefik.tcp.routers.minecraft.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.minecraft.service=minecraft"
+      # service: minecraft
+      - "traefik.tcp.services.minecraft.loadbalancer.server.port=25565"
+
+  crafty:
+    image: registry.gitlab.com/crafty-controller/crafty-4:4.4.4
+    container_name: crafty
+    restart: always
+    networks:
+      - proxy
+    environment:
+      TZ: ${TZ:-Europe/Berlin}
+    # ports:
+      # - "8443:8443"               # HTTPS
+      # - "8123:8123"               # DYNMAP
+      # - "19132:19132/udp"         # BEDROCK
+      # - "25500-25600:25500-25600" # MC SERV PORT RANGE
+    volumes:
+        - ${DIR_DATA}/minecraft/crafty/backups:/crafty/backups
+        - ${DIR_DATA}/minecraft/crafty/logs:/crafty/logs
+        - ${DIR_DATA}/minecraft/crafty/servers:/crafty/servers
+        - ${DIR_DATA}/minecraft/crafty/config:/crafty/app/config
+        - ${DIR_DATA}/minecraft/crafty/import:/crafty/import
+    deploy:
+      resources:
+        limits:
+          memory: 6G
+        reservations:
+          memory: 512M
+    labels:
+      # Traefik 3.0
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      # router: crafty
+      - "traefik.http.routers.crafty.entrypoints=https"
+      - "traefik.http.routers.crafty.rule=Host(`${DOMAIN_CRAFTY:-crafty.pixelstack.live}`)"
+      - "traefik.http.routers.crafty.middlewares=secured@file"
+      - "traefik.http.routers.crafty.service=crafty"
+      - "traefik.http.routers.crafty.tls=true"
+      - "traefik.http.routers.crafty.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
+      # service: crafty
+      - "traefik.http.services.crafty.loadbalancer.server.scheme=https"
+      - "traefik.http.services.crafty.loadbalancer.server.port=8443"
+
+networks:
+  proxy:
+    external: true

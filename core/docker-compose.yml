@@ -103,6 +103,8 @@ services:
 #      - "--entrypoints.postgres.address=:5432"
       # entryPoints.auth-ldap
       - "--entrypoints.auth-ldap.address=:636"
+      # entryPoints.minecraft
+      - "--entrypoints.minecraft.address=:25565"
       # serversTransport
       - "--serversTransport.insecureSkipVerify=true"
       # providers
