@@ -28,8 +28,8 @@ services:
       - /dev/dri:/dev/dri
     volumes:
       - /etc/hosts:/etc/hosts:ro
-      -  ${DIR_DATA}/jellyfin-data/cache:-./jellyfin-data/cache:/cache
-      -  ${DIR_DATA}/jellyfin-data/config:-./jellyfin-data/config:/config
+      - ${DIR_DATA:-./}/jellyfin-data/cache:/cache
+      - ${DIR_DATA:-./}/jellyfin-data/config:/config
       - "${DIR_MOVIES}:/media/movies"
       - "${DIR_SERIES}:/media/series"
     labels:
