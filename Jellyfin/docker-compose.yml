@@ -14,7 +14,7 @@ services:
       timeout: 30s
       retries: 3
       start_period: 10s
-    network_mode: 'host'
+    # network_mode: 'host'
     ports:
       - 8096:8096 # Http webUI
     #   - 8920:8920 # Https webUI (certificate required)

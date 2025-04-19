@@ -1,4 +1,15 @@
 http:
+  routers:
+    truenas:
+      entryPoints:
+        - https
+      rule: "Host(`truenas.pixelstack.live`)"
+      middlewares:
+        - secured
+      tls:
+        certResolver: "production"
+      service: "truenas"
+
   services:
     truenas:
       loadBalancer:
