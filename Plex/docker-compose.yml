@@ -5,7 +5,7 @@ version: '3'
 
 services:
   plex:
-    image: lscr.io/linuxserver/plex:1.41.8
+    image: lscr.io/linuxserver/plex:1.41.9
     container_name: plex
     restart: always
     networks:
