@@ -1,8 +1,6 @@
 # Title: Homepage
 # Description: A simple homepage
 
-version: '3'
-
 services:
   homepage:
     image: ghcr.io/gethomepage/homepage:v1.4.0
@@ -11,8 +9,8 @@ services:
     networks:
       - proxy
       - backend
-    ports:
-      - 3000:3000
+    # ports:
+    #   - 3000:3000
     environment:
       PUID: ${PUID:-1000}
       PGID: ${PGID:-1000}
@@ -49,8 +47,8 @@ services:
     restart: always
     networks:
       - backend
-    ports:
-      - 127.0.0.1:2375:2375
+    # ports:
+    #   - 127.0.0.1:2375:2375
     environment:
       CONTAINERS: 1 # Allow access to viewing containers
       POST: 0 # Disallow any POST operations (effectively read-only)
@@ -60,4 +58,4 @@ services:
 networks:
   proxy:
     external: true
-  backend:
+  backend: {}

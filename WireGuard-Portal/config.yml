@@ -1,0 +1,94 @@
+core:
+  admin_user: ${WG_PORTAL_ADMIN_USER:-admin@wgportal.local}
+  admin_password: ${WG_PORTAL_ADMIN_PASS:-wgportal}
+  admin_api_token: ""
+  editable_keys: true
+  create_default_peer: true
+  create_default_peer_on_creation: true
+  re_enable_peer_after_user_enable: true
+  delete_peer_after_user_deleted: true
+  self_provisioning_allowed: true
+  import_existing: true
+  restore_state: true
+
+advanced:
+  log_level: info
+  log_pretty: false
+  log_json: false
+  start_listen_port: 51820
+  start_cidr_v4: 10.11.12.0/24
+  start_cidr_v6: fdfd:d3ad:c0de:1234::0/64
+  use_ip_v6: true
+  config_storage_path: ""
+  expiry_check_interval: 15m
+  rule_prio_offset: 20000
+  route_table_offset: 20000
+  api_admin_only: true
+
+database:
+  debug: false
+  slow_query_threshold: "0"
+  type: sqlite
+  dsn: data/sqlite.db
+  encryption_passphrase: ${WG_PORTAL_DB_ENCRYPTION_PASSPHRASE}
+
+statistics:
+  use_ping_checks: true
+  ping_check_workers: 10
+  ping_unprivileged: false
+  ping_check_interval: 1m
+  data_collection_interval: 1m
+  collect_interface_data: true
+  collect_peer_data: true
+  collect_audit_data: true
+  listening_address: :8787
+
+mail:
+  host: ${WG_PORTAL_EMAIL_HOST:-localhost}
+  port: ${WG_PORTAL_EMAIL_PORT:-587}
+  encryption: ${WG_PORTAL_EMAIL_ENCRYPTION:-starttls}
+  username: ${WG_PORTAL_EMAIL_USERNAME:-username}
+  password: ${WG_PORTAL_EMAIL_PASSWORD:-password}
+  auth_type: ${WG_PORTAL_EMAIL_AUTH_TYPE:-login}
+  from: Wireguard Portal <${WG_PORTAL_EMAIL_FROM:-noreply@wireguard.local}>
+
+auth:
+  oidc:
+    - id: oidc1
+      provider_name: authentik
+      display_name: Login with</br>Authentik
+      base_url: ${AUTHENTIK_SERVER_URL:-https://authentik.example.com/application/o/wireguard-portal/}
+      client_id: ${AUTHENTIK_CLIENT_ID:-client-id-from-authentik}
+      client_secret: ${AUTHENTIK_CLIENT_SECRET:-client-secret-from-authentik}
+      extra_scopes:
+        - profile
+        - is_admin
+        - email
+      allowed_domains: []
+      field_map:
+        user_identifier: "preferred_username"
+        email: "email"
+        firstname: "name"
+        is_admin: is_admin
+      admin_mapping: {}
+      registration_enabled: true
+      log_user_info: false
+
+
+web:
+  listening_address: :8888
+  external_url: https://${DOMAIN_WG_PORTAL:-wg-portal.pixelstack.live}
+  site_company_name: WireGuard Portal
+  site_title: WireGuard Portal
+  session_identifier: wgPortalSession
+  session_secret: ${SESSION_SECRET:-very_secret}
+  csrf_secret: ${CSRF_SECRET:-extremely_secret}
+  request_logging: false
+  expose_host_info: false
+  cert_file: ""
+  key_File: ""
+
+webhook:
+  url: ""
+  authentication: ""
+  timeout: 10s

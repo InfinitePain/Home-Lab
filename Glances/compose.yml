@@ -1,0 +1,33 @@
+# Title: Glances
+# Description: System monitoring tool
+
+services:
+
+  glances:
+    image: nicolargo/glances:4.3.3
+    restart: always
+    networks:
+      - proxy
+    pid: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/os-release:/etc/os-release:ro
+    environment:
+      - "GLANCES_OPT=-w"
+    labels:
+      # Traefik 3.0
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      # router: glances
+      - "traefik.http.routers.glances.entrypoints=https"
+      - "traefik.http.routers.glances.rule=Host(`${DOMAIN_GLANCES:-glances.pixelstack.live}`)"
+      - "traefik.http.routers.glances.middlewares=secured@file"
+      - "traefik.http.routers.glances.service=glances"
+      - "traefik.http.routers.glances.tls=true"
+      - "traefik.http.routers.glances.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
+      # service: glances
+      - "traefik.http.services.glances.loadbalancer.server.port=61208"
+
+networks:
+  proxy:
+    external: true

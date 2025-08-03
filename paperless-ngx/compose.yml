@@ -1,0 +1,165 @@
+# Title: Paperless-ngx
+# Description: Document management system
+
+services:
+  valkey:
+    image: valkey/valkey:8.1.2-alpine
+    container_name: valkey-paperless
+    command: --save 60 1 --loglevel warning
+    restart: always
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli ping | grep PONG"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 3s
+    volumes:
+      - ${DIR_DATA}/valkey-data:/data
+
+  postgresql:
+    image: docker.io/library/postgres:17.2-alpine3.19
+    container_name: postgresql-paperless
+    restart: always
+    networks:
+      - backend
+    # ports:
+    #   - 5432:5432  
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    environment:
+      POSTGRES_DB: ${DB_NAME:-paperless}
+      POSTGRES_USER: ${DB_USER:-paperless}
+      POSTGRES_PASSWORD: ${DB_PASS:?database password required}
+    volumes:
+      - ${DIR_DATA}/db-data:/var/lib/postgresql/data
+
+  paperless-ngx:
+    image: ghcr.io/paperless-ngx/paperless-ngx:2.17.1
+    container_name: paperless
+    restart: always
+    depends_on:
+      - postgresql
+      - valkey
+      - gotenberg
+      - tika
+    networks:
+      - proxy
+      - backend
+    # ports:
+    #   - "8000:8000"
+    volumes:
+      - ${DIR_DATA}/paperless-data:/usr/src/paperless/data
+      - ${DIR_MEDIA}:/usr/src/paperless/media
+      - ${DIR_EXPORT}:/usr/src/paperless/export
+      - ${DIR_CONSUME}:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://valkey:6379
+      PAPERLESS_DBHOST: postgresql
+      PAPERLESS_DBNAME: ${DB_NAME:-paperless}
+      PAPERLESS_DBUSER: ${DB_USER:-paperless}
+      PAPERLESS_DBPASS: ${DB_PASS}
+      PAPERLESS_TIKA_ENABLED: 1
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
+      PAPERLESS_TIKA_ENDPOINT: http://tika:9998
+      PAPERLESS_FILENAME_FORMAT: "{{ owner_username }}/{{ correspondent }}/{{ created_year }}/{{ created }}_{{ title }}"
+      PAPERLESS_FILENAME_FORMAT_REMOVE_NONE: true
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY:-change-me}
+      PAPERLESS_URL: ${DOMAIN_PAPERLESS:-https://paperless.pixelstack.live}
+      PAPERLESS_ADMIN_USER: ${ADMIN_USER:-paperless-admin}
+      PAPERLESS_ADMIN_PASSWORD: ${ADMIN_PASS:?admin password required}
+      PAPERLESS_LOGOUT_REDIRECT_URL: ${AUTHENTIK_LOGOUT_REDIRECT_URL:?AUTHENTIK_LOGOUT_REDIRECT_URL environment variable is required}
+      PAPERLESS_ACCOUNT_ALLOW_SIGNUPS: false
+      PAPERLESS_SOCIALACCOUNT_PROVIDERS: >
+        {
+          "openid_connect": {
+            "APPS": [
+              {
+                "provider_id": "authentik",
+                "name": "Authentik",
+                "client_id": "${AUTHENTIK_CLIENT_ID:?AUTHENTIK_CLIENT_ID environment variable is required}",
+                "secret": "${AUTHENTIK_CLIENT_SECRET:?AUTHENTIK_CLIENT_SECRET environment variable is required}",
+                "settings": {
+                  "server_url": "${AUTHENTIK_SERVER_URL:?AUTHENTIK_SERVER_URL environment variable is required}"
+                }
+              }
+            ],
+            "OAUTH_PKCE_ENABLED": "True"
+          }
+        }
+      PAPERLESS_SOCIAL_AUTO_SIGNUP: true
+      PAPERLESS_SOCIALACCOUNT_ALLOW_SIGNUPS: true
+      PAPERLESS_SOCIAL_ACCOUNT_SYNC_GROUPS: false
+      PAPERLESS_ACCOUNT_DEFAULT_HTTP_PROTOCOL: https
+      PAPERLESS_ACCOUNT_EMAIL_VERIFICATION: 'none' # 'optional' or 'mandatory'
+      PAPERLESS_ACCOUNT_EMAIL_UNKNOWN_ACCOUNTS: false
+      PAPERLESS_DISABLE_REGULAR_LOGIN: true
+      PAPERLESS_REDIRECT_LOGIN_TO_SSO: true
+      PAPERLESS_ACCOUNT_SESSION_REMEMBER: true
+      PAPERLESS_SESSION_COOKIE_AGE: 1209600 # 2 weeks
+      # PAPERLESS_TASK_WORKERS: 1
+      # PAPERLESS_THREADS_PER_WORKER: 1
+      PAPERLESS_TIME_ZONE: ${TZ:-Europe/Berlin}
+      PAPERLESS_APPS: allauth.socialaccount.providers.openid_connect
+      # PAPERLESS_CONSUMER_DISABLE: true # Uncomment to disable the consumer
+      PAPERLESS_CONSUMER_RECURSIVE: true
+      PAPERLESS_EMPTY_TRASH_DELAY: 180
+      USERMAP_UID: ${PUID:-1000}
+      USERMAP_GID: ${PGID:-1000}
+      PAPERLESS_OCR_LANGUAGES: ${PAPERLESS_OCR_LANGUAGES:-deu tur eng}
+      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-deu}
+      PAPERLESS_EMAIL_HOST: ${PAPERLESS_EMAIL_HOST:-localhost}
+      PAPERLESS_EMAIL_PORT: ${PAPERLESS_EMAIL_PORT:-25}
+      PAPERLESS_EMAIL_HOST_USER: ${PAPERLESS_EMAIL_USERNAME}
+      PAPERLESS_EMAIL_FROM: ${PAPERLESS_EMAIL_FROM:-PAPERLESS_EMAIL_HOST_USER}
+      PAPERLESS_EMAIL_HOST_PASSWORD: ${PAPERLESS_EMAIL_PASSWORD}
+      PAPERLESS_EMAIL_USE_TLS: true
+      PAPERLESS_EMAIL_USE_SSL: false
+    labels:
+      # Traefik 3.0
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"  
+      # router: paperless-main (main application)
+      - "traefik.http.routers.paperless-main.entrypoints=https"
+      - "traefik.http.routers.paperless-main.rule=Host(`${DOMAIN_PAPERLESS:-paperless.pixelstack.live}`) && !PathPrefix(`/admin`)"
+      - "traefik.http.routers.paperless-main.middlewares=secured@file"
+      - "traefik.http.routers.paperless-main.service=paperless-main"
+      - "traefik.http.routers.paperless-main.tls=true"
+      - "traefik.http.routers.paperless-main.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
+      # router: paperless-admin (admin section)
+      - "traefik.http.routers.paperless-admin.entrypoints=https"
+      - "traefik.http.routers.paperless-admin.rule=Host(`${DOMAIN_PAPERLESS:-paperless.pixelstack.live}`) && PathPrefix(`/admin`)"
+      - "traefik.http.routers.paperless-admin.middlewares=secured@file"
+      - "traefik.http.routers.paperless-admin.service=paperless-main"
+      - "traefik.http.routers.paperless-admin.tls=true"
+      - "traefik.http.routers.paperless-admin.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production  
+      # service: paperless
+      - "traefik.http.services.paperless-main.loadbalancer.server.port=8000"
+
+  gotenberg:
+    image: docker.io/gotenberg/gotenberg:8.19
+    container_name: gotenberg
+    restart: always
+    networks:
+      - backend
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
+
+  tika:
+    image: docker.io/apache/tika:3.2.1.0
+    container_name: tika
+    restart: always
+    networks:
+      - backend
+
+networks:
+  proxy:
+    external: true
+  backend: {}

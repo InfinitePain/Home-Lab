@@ -1,8 +1,6 @@
 # Title: Portainer
 # Description: A lightweight Docker management UI.
 
-version: '3'
-
 services:
   portainer:
     image: portainer/portainer-ce:2.31.3-alpine
@@ -26,7 +24,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${DIR_DATA}/portainer-data:/data
     labels:
-      # Traefik 2.0
+      # Traefik 3.0
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       # router: portainer-frontend
@@ -124,7 +122,7 @@ services:
       - "--certificatesResolvers.production.acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
       - "--certificatesResolvers.production.acme.dnsChallenge.provider=cloudflare"
       - "--certificatesResolvers.production.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
-#    labels:
+    labels:
       - "traefik.enable=true"
       # router: traefik
       - "traefik.http.routers.traefik.entrypoints=https"

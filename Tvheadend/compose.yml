@@ -1,8 +1,6 @@
 # Title: Tvheadend
 # Description: Tvheadend is a TV streaming server and recorder for Linux.
 
-version: '3'
-
 services:
   tvheadend:
     image: lscr.io/linuxserver/tvheadend:latest

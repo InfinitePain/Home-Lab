@@ -1,8 +1,6 @@
 # Title: Jellyfin
 # Description: Media server
 
-version: "3"
-
 services:
   jellyfin:
     image: ghcr.io/linuxserver/jellyfin@sha256:500c6c81ca870895d1d26597ebda92f3aa9909318a54335803940408b815bb2f
@@ -17,8 +15,8 @@ services:
     # network_mode: 'host'
     networks:
       - proxy
-    ports:
-      - 8096:8096 # Http webUI
+    # ports:
+    #   - 8096:8096 # Http webUI
     #   - 8920:8920 # Https webUI (certificate required)
     #   - 7359:7359/udp # Jellyfin local network discovery
     #   - 1900:1900/udp # DNLA/service discovery
@@ -30,12 +28,12 @@ services:
       - /dev/dri:/dev/dri
     volumes:
       - /etc/hosts:/etc/hosts:ro
-      - ${DIR_DATA:-./}/jellyfin-data/cache:/cache
-      - ${DIR_DATA:-./}/jellyfin-data/config:/config
+      - ${DIR_DATA}/cache:/cache
+      - ${DIR_DATA}/config:/config
       - "${DIR_MOVIES}:/media/movies"
       - "${DIR_SERIES}:/media/series"
     labels:
-      # Traefik 2.0
+      # Traefik 3.0
       - "traefik.enable=true"
       # router: jellyfin
       - "traefik.http.routers.jellyfin.entrypoints=https"
@@ -43,7 +41,7 @@ services:
       - "traefik.http.routers.jellyfin.middlewares=jellyfin-headers,default-whitelist@file"
       - "traefik.http.routers.jellyfin.service=jellyfin"
       - "traefik.http.routers.jellyfin.tls=true"
-      - "traefik.http.routers.jellyfin.tls.certresolver=${CERT_RESOLVER}" # staging or production
+      - "traefik.http.routers.jellyfin.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
       # service: jellyfin
       - "traefik.http.services.jellyfin.loadbalancer.server.port=8096" 
       - "traefik.http.services.jellyfin.loadbalancer.passHostHeader=true"
@@ -56,9 +54,10 @@ services:
       - "traefik.http.middlewares.jellyfin-headers.headers.STSSeconds=315360000"
       - "traefik.http.middlewares.jellyfin-headers.headers.SSLRedirect=true"
       - "traefik.http.middlewares.jellyfin-headers.headers.SSLForceHost=true"
+      - 'traefik.http.middlewares.jellyfin-mw.headers.SSLHost=${DOMAIN_JELLYFIN:-jellyfin.pixelstack.live}'
       - "traefik.http.middlewares.jellyfin-headers.headers.customFrameOptionsValue=SAMEORIGIN"
       - "traefik.http.middlewares.jellyfin-headers.headers.customResponseHeaders.X-Robots-Tag=noindex,nofollow,nosnippet,noarchive,notranslate,noimageindex"
-      - "traefik.http.middlewares.jellyfin-headers.headers.customresponseheaders.X-XSS-PROTECTION=0"
+      - "traefik.http.middlewares.jellyfin-headers.headers.customresponseheaders.X-XSS-PROTECTION=1"
       # Homepage Dashboard
       - homepage.group=Services
       - homepage.name=Jellyfin

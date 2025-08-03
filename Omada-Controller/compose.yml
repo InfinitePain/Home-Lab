@@ -1,8 +1,6 @@
 # Title: Omada Controller
 # Description: TP-Link Omada Controller
 
-version: "3"
-
 services:
   omada-controller:
     image: mbentley/omada-controller:5.15
@@ -50,7 +48,7 @@ services:
       - "${DIR_DATA}/omada-data/data:/opt/tplink/EAPController/data"
       - "${DIR_DATA}/omada-data/logs:/opt/tplink/EAPController/logs"
     labels:
-      # Traefik 2.0
+      # Traefik 3.0
       - "traefik.enable=true"
       # router: omadactl
       - "traefik.http.routers.omadactl.entrypoints=https"

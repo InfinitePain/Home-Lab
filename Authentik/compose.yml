@@ -1,15 +1,14 @@
 # Title: authentik
 # Description: Identity provider
 
-version: '3'
-
 services:
   postgresql:
     image: docker.io/library/postgres:17.2-alpine3.19
-    container_name: postgresql
+    container_name: postgresql-authentik
     restart: always
     networks:
       - proxy
+      - backend
     # ports:
     #   - 5432:5432  
     healthcheck:
@@ -27,11 +26,12 @@ services:
 
   valkey:
     image: valkey/valkey:8.1.3-alpine
-    container_name: valkey
+    container_name: valkey-authentik
     command: --save 60 1 --loglevel warning
     restart: always
     networks:
       - proxy
+      - backend
     healthcheck:
       test: ["CMD-SHELL", "valkey-cli ping | grep PONG"]
       start_period: 20s
@@ -51,9 +51,10 @@ services:
     command: server
     networks:
       - proxy
-    # ports:
-    #   - "8086:9000"
-    #   - "8087:9443"
+      - backend
+    ports:
+      - "8086:9000"
+      - "8087:9443"
     environment:
       AUTHENTIK_REDIS__HOST: valkey
       AUTHENTIK_POSTGRESQL__HOST: postgresql
@@ -73,7 +74,7 @@ services:
       - ${DIR_DATA}/authentik-data/media:/media
       - ${DIR_DATA}/authentik-data/templates:/templates
     labels:
-      # Traefik 2.0
+      # Traefik 3.0
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       # router: authentik
@@ -106,6 +107,7 @@ services:
       - valkey
     networks:
       - proxy
+      - backend
     environment:
       AUTHENTIK_REDIS__HOST: valkey
       AUTHENTIK_POSTGRESQL__HOST: postgresql
@@ -132,15 +134,16 @@ services:
     restart: always
     networks:
       - proxy
-    # ports:
-    #   - 389:3389
+      - backend
+    ports:
+      - 389:3389
     #   - 636:6636
     environment:
       AUTHENTIK_HOST: https://auth-server:9443
       AUTHENTIK_INSECURE: "true"
       AUTHENTIK_TOKEN: ${LDAP_TOKEN}
     labels:
-      # Traefik 2.0
+      # Traefik 3.0
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       # router: auth-ldap
@@ -156,3 +159,4 @@ services:
 networks:
   proxy:
     external: true
+  backend: {}
