@@ -26,7 +26,7 @@ services:
       PLEX_CLAIM: ${PLEX_CLAIM}
       ADVERTISE_IP: ${ADVERTISE_IP}/
     volumes:
-      - ${DIR_DATA}/plex-data/config:/config
+      - ${DIR_DATA}/config:/config
       - ${DIR_MOVIES}:/movies
       - ${DIR_SHOWS}:/tv
     devices:

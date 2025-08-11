@@ -16,11 +16,11 @@ services:
     #   - "19132:19132/udp"         # BEDROCK
     #   - "25500-25600:25500-25600" # MC SERV PORT RANGE
     volumes:
-        - ${DIR_DATA}/minecraft/crafty/backups:/crafty/backups
-        - ${DIR_DATA}/minecraft/crafty/logs:/crafty/logs
-        - ${DIR_DATA}/minecraft/crafty/servers:/crafty/servers
-        - ${DIR_DATA}/minecraft/crafty/config:/crafty/app/config
-        - ${DIR_DATA}/minecraft/crafty/import:/crafty/import
+        - ${DIR_DATA}/crafty/backups:/crafty/backups
+        - ${DIR_DATA}/crafty/logs:/crafty/logs
+        - ${DIR_DATA}/crafty/servers:/crafty/servers
+        - ${DIR_DATA}/crafty/config:/crafty/app/config
+        - ${DIR_DATA}/crafty/import:/crafty/import
     deploy:
       resources:
         limits:
