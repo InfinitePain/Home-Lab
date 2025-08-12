@@ -9,7 +9,7 @@
 
 services:
   wireguard-portal:
-    image: wgportal/wg-portal:v2.0.2
+    image: wgportal/wg-portal:v2.0.4
     container_name: wireguard-portal
     restart: always
     networks:
