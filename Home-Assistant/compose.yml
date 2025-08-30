@@ -1,0 +1,30 @@
+services:
+  home_assistant:
+    image: ghcr.io/home-assistant/home-assistant:2025.8.2
+    container_name: home_assistant
+    restart: always
+    networks:
+      - proxy
+    # ports:
+    #   - 8123:8123
+    environment:
+      TZ: ${TZ:-Europe/Berlin}
+    volumes:
+      - ${DIR_DATA}/config:/config
+    labels:
+      # Traefik 3.0
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      # router: home_assistant
+      - "traefik.http.routers.home_assistant.entrypoints=https"
+      - "traefik.http.routers.home_assistant.rule=Host(`${DOMAIN_HOME_ASSISTANT:-home-assistant.pixelstack.live}`)"
+      - "traefik.http.routers.home_assistant.middlewares=secured@file"
+      - "traefik.http.routers.home_assistant.service=home_assistant"
+      - "traefik.http.routers.home_assistant.tls=true"
+      - "traefik.http.routers.home_assistant.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
+      # service: home_assistant
+      - "traefik.http.services.home_assistant.loadbalancer.server.port=8123"
+
+networks:
+  proxy:
+    external: true

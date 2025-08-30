@@ -97,6 +97,10 @@ services:
       - "--entrypoints.http.http.redirections.entryPoint.scheme=https"
       # entryPoints.https
       - "--entrypoints.https.address=:443"
+      # entryPoints.https.transport
+      - "--entrypoints.https.transport.respondingTimeouts.readTimeout=600s"
+      - "--entrypoints.https.transport.respondingTimeouts.idleTimeout=600s"
+      - "--entrypoints.https.transport.respondingTimeouts.writeTimeout=600s"
 #      # entryPoints.postgres
 #      - "--entrypoints.postgres.address=:5432"
       # entryPoints.auth-ldap
