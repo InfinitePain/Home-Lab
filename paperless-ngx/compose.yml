@@ -143,7 +143,7 @@ services:
       - "traefik.http.services.paperless-main.loadbalancer.server.port=8000"
 
   gotenberg:
-    image: docker.io/gotenberg/gotenberg:8.22
+    image: docker.io/gotenberg/gotenberg:8.23
     container_name: gotenberg
     restart: always
     networks:
