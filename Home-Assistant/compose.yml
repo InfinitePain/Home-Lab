@@ -29,17 +29,10 @@ services:
       - "traefik.tcp.routers.homekit_01.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.homekit_01.middlewares=default-whitelist@file"
       - "traefik.tcp.routers.homekit_01.service=homekit_01"
-      # router: homekit_01
-      - "traefik.udp.routers.homekit_01.entrypoints=homekit_01"
-      - "traefik.udp.routers.homekit_01.rule=HostSNI(`*`)"
-      - "traefik.udp.routers.homekit_01.middlewares=default-whitelist@file"
-      - "traefik.udp.routers.homekit_01.service=homekit_01"
       # service: home_assistant
       - "traefik.http.services.home_assistant.loadbalancer.server.port=8123"
       # service: homekit_01
       - "traefik.tcp.services.homekit_01.loadbalancer.server.port=21064"
-      # service: homekit_01
-      - "traefik.udp.services.homekit_01.loadbalancer.server.port=5353"
 
 networks:
   proxy:
