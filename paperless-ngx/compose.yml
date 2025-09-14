@@ -40,7 +40,7 @@ services:
       - ${DIR_DATA}/db-data:/var/lib/postgresql/data
 
   paperless-ngx:
-    image: ghcr.io/paperless-ngx/paperless-ngx:2.18.2
+    image: ghcr.io/paperless-ngx/paperless-ngx:2.18.4
     container_name: paperless
     restart: always
     depends_on:
