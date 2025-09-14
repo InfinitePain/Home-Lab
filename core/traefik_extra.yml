@@ -93,11 +93,20 @@ tls:
     mintls13:
       minVersion: "VersionTLS13"
 
-#tcp:
-#  middlewares:
-#    default-whitelist:
-#      ipAllowList:
-#        sourceRange:
-#          - "10.0.0.0/8"
-#          - "192.168.0.0/16"
-#          - "172.16.0.0/12"
+tcp:
+  middlewares:
+    default-whitelist:
+      ipAllowList:
+        sourceRange:
+          - "10.0.0.0/8"
+          - "192.168.0.0/16"
+          - "172.16.0.0/12"
+
+udp:
+  middlewares:
+    default-whitelist:
+      ipAllowList:
+        sourceRange:
+          - "10.0.0.0/8"
+          - "192.168.0.0/16"
+          - "172.16.0.0/12"

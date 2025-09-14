@@ -7,6 +7,8 @@ services:
       - proxy
     # ports:
     #   - 8123:8123
+    #   - 21064:21064
+    #   - 5353:5353/udp
     environment:
       TZ: ${TZ:-Europe/Berlin}
     volumes:
@@ -22,17 +24,22 @@ services:
       - "traefik.http.routers.home_assistant.service=home_assistant"
       - "traefik.http.routers.home_assistant.tls=true"
       - "traefik.http.routers.home_assistant.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
-      # router: home_assistant_homekit01
-      - "traefik.http.routers.home_assistant_homekit01.entrypoints=https"
-      - "traefik.http.routers.home_assistant_homekit01.rule=Host(`${DOMAIN_HOME_ASSISTANT_HOMEKIT_01:-hass_homekit01.pixelstack.live}`)"
-      - "traefik.http.routers.home_assistant_homekit01.middlewares=secured@file"
-      - "traefik.http.routers.home_assistant_homekit01.service=home_assistant_homekit01"
-      - "traefik.http.routers.home_assistant_homekit01.tls=true"
-      - "traefik.http.routers.home_assistant_homekit01.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
+      # router: homekit_01
+      - "traefik.tcp.routers.homekit_01.entrypoints=homekit_01"  
+      - "traefik.tcp.routers.homekit_01.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.homekit_01.middlewares=default-whitelist@file"
+      - "traefik.tcp.routers.homekit_01.service=homekit_01"
+      # router: homekit_01
+      - "traefik.udp.routers.homekit_01.entrypoints=homekit_01"
+      - "traefik.udp.routers.homekit_01.rule=HostSNI(`*`)"
+      - "traefik.udp.routers.homekit_01.middlewares=default-whitelist@file"
+      - "traefik.udp.routers.homekit_01.service=homekit_01"
       # service: home_assistant
       - "traefik.http.services.home_assistant.loadbalancer.server.port=8123"
-      # service: home_assistant_homekit01
-      - "traefik.http.services.home_assistant_homekit01.loadbalancer.server.port=21064"
+      # service: homekit_01
+      - "traefik.tcp.services.homekit_01.loadbalancer.server.port=21064"
+      # service: homekit_01
+      - "traefik.udp.services.homekit_01.loadbalancer.server.port=5353"
 
 networks:
   proxy:

@@ -70,6 +70,9 @@ services:
       - 443:443
 #      - 5432:5432
       - 636:636
+      - 25565:25565
+      - 21064:21064
+      - 5353:5353/udp
     environment:
       CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN:?cloudflare token required}
     volumes:
@@ -107,6 +110,10 @@ services:
       - "--entrypoints.auth-ldap.address=:636"
       # entryPoints.minecraft
       - "--entrypoints.minecraft.address=:25565"
+      # entryPoints.homekit_01
+      - "--entrypoints.homekit_01.address=:21064"
+      # entryPoints.homekit_01
+      - "--entrypoints.homekit_01.address=:5353/udp"
       # serversTransport
       - "--serversTransport.insecureSkipVerify=true"
       # providers
