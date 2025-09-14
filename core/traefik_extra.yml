@@ -9,24 +9,29 @@ http:
       tls:
         certResolver: "production"
       service: "truenas"
+    home-assistant:
+      entryPoints:
+        - https
+      rule: "Host(`home-assistant.pixelstack.live`)"
+      middlewares:
+        - secured
+      tls:
+        certResolver: "production"
+      service: "home_assistant"
 
   services:
     truenas:
       loadBalancer:
         servers:
-          - url: "https://192.168.0.13:8081"
+          - url: "https://192.168.10.10:8082"
+    home-assistant:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.10.20:8123"
     omadactl:
       loadBalancer:
         servers:
-          - url: "https://192.168.0.13:8043"
-    pihole:
-      loadBalancer:
-        servers:
-          - url: "http://192.168.0.11:8084"
-    wg-portal:
-      loadBalancer:
-        servers:
-          - url: "http://192.168.0.11:8888"
+          - url: "https://192.168.10.10:8043"
 
   middlewares:
     default-headers:
@@ -96,16 +101,7 @@ tls:
 tcp:
   middlewares:
     default-whitelist:
-      ipAllowList:
-        sourceRange:
-          - "10.0.0.0/8"
-          - "192.168.0.0/16"
-          - "172.16.0.0/12"
-
-udp:
-  middlewares:
-    default-whitelist:
-      ipAllowList:
+      IPAllowList:
         sourceRange:
           - "10.0.0.0/8"
           - "192.168.0.0/16"

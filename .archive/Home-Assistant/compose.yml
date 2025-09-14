@@ -1,0 +1,39 @@
+services:
+  home_assistant:
+    image: ghcr.io/home-assistant/home-assistant:2025.9.3
+    container_name: home_assistant
+    restart: always
+    networks:
+      - proxy
+    # ports:
+    #   - 8123:8123
+    #   - 21064:21064
+    #   - 5353:5353/udp
+    environment:
+      TZ: ${TZ:-Europe/Berlin}
+    volumes:
+      - ${DIR_DATA}/config:/config
+    labels:
+      # Traefik 3.0
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      # router: home_assistant
+      - "traefik.http.routers.home_assistant.entrypoints=https"
+      - "traefik.http.routers.home_assistant.rule=Host(`${DOMAIN_HOME_ASSISTANT:-home-assistant.pixelstack.live}`)"
+      - "traefik.http.routers.home_assistant.middlewares=secured@file"
+      - "traefik.http.routers.home_assistant.service=home_assistant"
+      - "traefik.http.routers.home_assistant.tls=true"
+      - "traefik.http.routers.home_assistant.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
+      # router: homekit_01
+      - "traefik.tcp.routers.homekit_01.entrypoints=homekit_01"  
+      - "traefik.tcp.routers.homekit_01.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.homekit_01.middlewares=default-whitelist@file"
+      - "traefik.tcp.routers.homekit_01.service=homekit_01"
+      # service: home_assistant
+      - "traefik.http.services.home_assistant.loadbalancer.server.port=8123"
+      # service: homekit_01
+      - "traefik.tcp.services.homekit_01.loadbalancer.server.port=21064"
+
+networks:
+  proxy:
+    external: true
