@@ -40,7 +40,7 @@ services:
       timeout: 3s
 
   immich:
-    image: ghcr.io/immich-app/immich-server:v1.142.0
+    image: ghcr.io/immich-app/immich-server:v1.144.1
     container_name: immich
     restart: always
     depends_on:
