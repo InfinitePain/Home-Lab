@@ -1,6 +1,6 @@
 services:
   home_assistant:
-    image: ghcr.io/home-assistant/home-assistant:2025.9.3
+    image: ghcr.io/home-assistant/home-assistant:2025.10.4
     container_name: home_assistant
     restart: always
     networks:
