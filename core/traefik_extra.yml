@@ -17,7 +17,7 @@ http:
         - secured
       tls:
         certResolver: "production"
-      service: "home_assistant"
+      service: "home-assistant"
 
   services:
     truenas:
