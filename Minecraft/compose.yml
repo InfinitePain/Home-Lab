@@ -3,7 +3,7 @@
 
 services:
   crafty:
-    image: registry.gitlab.com/crafty-controller/crafty-4:4.6.2
+    image: registry.gitlab.com/crafty-controller/crafty-4:4.7.0
     container_name: crafty
     restart: always
     networks:
