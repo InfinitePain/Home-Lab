@@ -86,7 +86,8 @@ services:
                 "client_id": "${AUTHENTIK_CLIENT_ID:?AUTHENTIK_CLIENT_ID environment variable is required}",
                 "secret": "${AUTHENTIK_CLIENT_SECRET:?AUTHENTIK_CLIENT_SECRET environment variable is required}",
                 "settings": {
-                  "server_url": "${AUTHENTIK_SERVER_URL:?AUTHENTIK_SERVER_URL environment variable is required}"
+                  "server_url": "${AUTHENTIK_SERVER_URL:?AUTHENTIK_SERVER_URL environment variable is required}",
+                  "claims": {"username": "email"}
                 }
               }
             ],
