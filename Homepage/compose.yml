@@ -14,8 +14,10 @@ services:
     environment:
       PUID: ${PUID:-1000}
       PGID: ${PGID:-1000}
+      HOMEPAGE_VAR_TITLE: ${HOMEPAGE_TITLE:-Pixelstack}
+      HOMEPAGE_VAR_START_URL: ${HOMEPAGE_START_URL:-https://pixelstack.live}
       HOMEPAGE_ALLOWED_HOSTS: ${DOMAIN_HOMEPAGE:-pixelstack.live}
-      HOMEPAGE_VAR_GLANCES_URL: ${GLANCES_URL:-glances.pixelstack.live}
+      HOMEPAGE_VAR_GLANCES_URL: ${GLANCES_URL:-https://glances.pixelstack.live}
       HOMEPAGE_VAR_GLANCES_USERNAME: ${GLANCES_USERNAME}
       HOMEPAGE_VAR_GLANCES_PASSWORD: ${GLANCES_PASSWORD}
       HOMEPAGE_VAR_OPENMETEO_LABEL: ${OPENMETEO_LABEL}

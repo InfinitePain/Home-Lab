@@ -23,11 +23,11 @@ layout:
   - Development:
   - University:
   - Shopping:
-  - raspberrypi:
+  - Shire:
       style: row
       columns: 1
       header: true
-  - raspberrypi-extra:
+  - Shire-extra:
       header: false
   - Storage:
       header: false

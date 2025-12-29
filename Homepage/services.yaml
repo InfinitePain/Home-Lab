@@ -1,19 +1,19 @@
 ---
 
-- raspberrypi:
+- Shire:
   - CPU:
       widget:
         type: glances
         url: {{HOMEPAGE_VAR_GLANCES_URL}}
         username: {{HOMEPAGE_VAR_GLANCES_USERNAME}}
         password: {{HOMEPAGE_VAR_GLANCES_PASSWORD}}
-        version: 3
+        version: 4
         metric: cpu
         refreshInterval: 1000
         pointsLimit: 30
         chart: true
 
-- raspberrypi-extra:
+- Shire-extra:
   - Memory:
       weight: 10
       widget:
@@ -21,7 +21,7 @@
         url: {{HOMEPAGE_VAR_GLANCES_URL}}
         username: {{HOMEPAGE_VAR_GLANCES_USERNAME}}
         password: {{HOMEPAGE_VAR_GLANCES_PASSWORD}}
-        version: 3
+        version: 4
         metric: memory
         refreshInterval: 1000
         pointsLimit: 15
@@ -34,54 +34,20 @@
         url: {{HOMEPAGE_VAR_GLANCES_URL}}
         username: {{HOMEPAGE_VAR_GLANCES_USERNAME}}
         password: {{HOMEPAGE_VAR_GLANCES_PASSWORD}}
-        version: 3
+        version: 4
         metric: network:eth0
         refreshInterval: 1000
         pointsLimit: 15
         chart: true
 
 - Storage:
-  - Root raspberrypi:
-      weight: 10
+  - TrueNAS:
       widget:
-        type: glances
-        url: {{HOMEPAGE_VAR_GLANCES_URL}}
-        username: {{HOMEPAGE_VAR_GLANCES_USERNAME}}
-        password: {{HOMEPAGE_VAR_GLANCES_PASSWORD}}
-        version: 3
-        metric: fs:/
-        diskUnits: bytes
-        refreshInterval: 1000
-        pointsLimit: 15
-        chart: false
-
-  - Elements:
-      weight: 20
-      widget:
-        type: glances
-        url: {{HOMEPAGE_VAR_GLANCES_URL}}
-        username: {{HOMEPAGE_VAR_GLANCES_USERNAME}}
-        password: {{HOMEPAGE_VAR_GLANCES_PASSWORD}}
-        version: 3
-        metric: fs:/mnt/Elements
-        diskUnits: bytes
-        refreshInterval: 1000
-        pointsLimit: 15
-        chart: false
-
-  - SSD:
-      weight: 30
-      widget:
-        type: glances
-        url: {{HOMEPAGE_VAR_GLANCES_URL}}
-        username: {{HOMEPAGE_VAR_GLANCES_USERNAME}}
-        password: {{HOMEPAGE_VAR_GLANCES_PASSWORD}}
-        version: 3
-        metric: fs:/mnt/SSD
-        diskUnits: bytes
-        refreshInterval: 1000
-        pointsLimit: 15
-        chart: false
+        type: truenas
+        url: https://truenas.pixelstack.live
+        key: yourtruenasapikey
+        enablePools: true
+        nasType: scale
 
 - Calender:
   - Calender:
