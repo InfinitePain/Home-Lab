@@ -94,7 +94,7 @@ services:
       - homepage.weight=20
       - homepage.widget.type=authentik
       - homepage.widget.fields=["users", "loginsLast24H", "failedLoginsLast24H"]
-      - homepage.widget.url=https://${DOMAIN_AUTHENTIK:-authentik.pixelstack.live}}
+      - homepage.widget.url=https://${DOMAIN_AUTHENTIK:-authentik.pixelstack.live}
       - homepage.widget.key=${HOMEPAGE_VAR_AUTHENTIK_KEY}
 
   auth-worker:
