@@ -27,6 +27,9 @@ services:
       HOMEPAGE_VAR_ICAL_URL: ${ICAL_URL}
       HOMEPAGE_VAR_ICAL_NAME: ${ICAL_NAME}
       HOMEPAGE_VAR_PORTAINER_URL: ${PORTAINER_URL:-portainer.pixelstack.live}
+      HOMEPAGE_VAR_TRUENAS_KEY: ${TRUENAS_KEY}
+      HOMEPAGE_VAR_UNIFI_USERNAME: ${UNIFI_USERNAME}
+      HOMEPAGE_VAR_UNIFI_PASSWORD: ${UNIFI_PASSWORD}
     volumes:
       - /etc/hosts:/etc/hosts:ro
       - ${DIR_DATA}/homepage-data/config:/app/config

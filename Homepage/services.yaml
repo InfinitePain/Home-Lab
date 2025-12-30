@@ -45,7 +45,7 @@
       widget:
         type: truenas
         url: https://truenas.pixelstack.live
-        key: yourtruenasapikey
+        key: {{HOMEPAGE_VAR_TRUENAS_KEY}}
         enablePools: true
         nasType: scale
 
@@ -73,14 +73,25 @@
 
 #- Services:
   # Nextcloud@docker weight: 10
-  # Jellyfin@docker weight: 20
+  # Immich@docker weight: 20
+  # Plex@docker weight: 30
+  # Jellyfin@docker weight: 40
+  # Paperless-NGX@docker weight: 50
 
 #- Providers:
   # PgAdmin@docker weight: 10
   # Threadfin@docker weight: 20
   # Threadfin Streamlink@docker weight: 30
 
-#- Networking:
+- Networking:
+  - UniFi:
+      widget:
+        weight: 5
+        type: unifi
+        url: https://192.168.1.1
+        username: {{HOMEPAGE_VAR_UNIFI_USERNAME}}
+        password: {{HOMEPAGE_VAR_UNIFI_PASSWORD}}
+        fields: ["uptime", "wan", "lan_users", "wlan_users"]
   # Omada Controller@docker weight: 10
   # PiHole@docker weight: 20
   # Wireguard Portal@docker weight: 30

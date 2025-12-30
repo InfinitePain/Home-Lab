@@ -64,13 +64,14 @@ services:
       - homepage.icon=jellyfin
       - homepage.href=https://${DOMAIN_JELLYFIN:-jellyfin.pixelstack.live}
       - homepage.description=Media Server
-      - homepage.weight=20
+      - homepage.weight=40
       - homepage.widget.type=jellyfin
       - homepage.widget.fields=["movies", "series", "episodes", "songs"]
       - homepage.widget.url=https://${DOMAIN_JELLYFIN:-jellyfin.pixelstack.live}
       - homepage.widget.key=${HOMEPAGE_VAR_JELLYFIN_KEY}
       - homepage.widget.enableBlocks=true
       - homepage.widget.enableNowPlaying=true
+
 networks:
   proxy:
     external: true

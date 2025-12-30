@@ -142,6 +142,17 @@ services:
       - "traefik.http.routers.paperless-admin.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production  
       # service: paperless
       - "traefik.http.services.paperless-main.loadbalancer.server.port=8000"
+      # Homepage Dashboard
+      - homepage.group=Services
+      - homepage.name=Paperless-NGX
+      - homepage.icon=paperlessngx
+      - homepage.href=https://${DOMAIN_PAPERLESS:-paperless.pixelstack.live}
+      - homepage.description=Document Management System
+      - homepage.weight=50
+      - homepage.widget.type=paperlessngx
+      - homepage.widget.fields=["total", "inbox"]
+      - homepage.widget.url=https://${DOMAIN_PAPERLESS:-paperless.pixelstack.live}
+      - homepage.widget.key=${HOMEPAGE_VAR_PAPERLESS_KEY}
 
   gotenberg:
     image: docker.io/gotenberg/gotenberg:8.25

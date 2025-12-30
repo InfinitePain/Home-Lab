@@ -44,6 +44,17 @@ services:
       - "traefik.http.routers.plex.tls.certresolver=${CERT_RESOLVER:-production}" # staging or production
       # service: plex
       - "traefik.http.services.plex.loadbalancer.server.port=32400"
+      # Homepage Dashboard
+      - homepage.group=Services
+      - homepage.name=Plex
+      - homepage.icon=plex
+      - homepage.href=https://${DOMAIN_PLEX:-plex.pixelstack.live}
+      - homepage.description=Media Server
+      - homepage.weight=30
+      - homepage.widget.type=plex
+      - homepage.widget.fields=["streams", "albums", "movies", "tv"]
+      - homepage.widget.url=https://${DOMAIN_PLEX:-plex.pixelstack.live}
+      - homepage.widget.key=${HOMEPAGE_VAR_PLEX_KEY}
 
 networks:
   proxy:
