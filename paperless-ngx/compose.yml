@@ -145,7 +145,7 @@ services:
       # Homepage Dashboard
       - homepage.group=Services
       - homepage.name=Paperless-NGX
-      - homepage.icon=paperlessngx
+      - homepage.icon=paperless-ngx
       - homepage.href=https://${DOMAIN_PAPERLESS:-paperless.pixelstack.live}
       - homepage.description=Document Management System
       - homepage.weight=50
