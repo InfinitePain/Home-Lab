@@ -40,7 +40,7 @@ services:
       timeout: 3s
 
   immich:
-    image: ghcr.io/immich-app/immich-server:v2.4.1
+    image: ghcr.io/immich-app/immich-server:v2.5.2
     container_name: immich
     restart: always
     depends_on:
@@ -90,7 +90,7 @@ services:
       - homepage.widget.version=2
 
   immich-machine-learning:
-    image: ghcr.io/immich-app/immich-machine-learning:v2.4.1-openvino
+    image: ghcr.io/immich-app/immich-machine-learning:v2.5.2-openvino
     container_name: immich-machine-learning
     restart: always
     networks:
