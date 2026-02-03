@@ -26,7 +26,7 @@ services:
     shm_size: 128mb
 
   valkey:
-    image: valkey/valkey:9.0.1-alpine
+    image: valkey/valkey:9.0.2-alpine
     container_name: valkey-immich
     command: --save 60 1 --loglevel warning
     restart: always
