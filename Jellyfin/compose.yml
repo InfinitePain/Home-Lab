@@ -3,7 +3,7 @@
 
 services:
   jellyfin:
-    image: ghcr.io/linuxserver/jellyfin@sha256:c796353f655c4be9911bf4594a25bb8da6341c5918a535a16b0bf1029123fc1c
+    image: ghcr.io/linuxserver/jellyfin@sha256:7351868a3a340049503d25da65fae19c77ce3ea58f607f702cac65b6faeec898
     container_name: jellyfin
     restart: always
     healthcheck:
