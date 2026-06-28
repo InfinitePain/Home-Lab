@@ -155,7 +155,7 @@ services:
       - homepage.widget.key=${HOMEPAGE_VAR_PAPERLESS_KEY}
 
   gotenberg:
-    image: docker.io/gotenberg/gotenberg:8.33
+    image: docker.io/gotenberg/gotenberg:8.34
     container_name: gotenberg
     restart: always
     networks:
