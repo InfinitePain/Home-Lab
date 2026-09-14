@@ -60,6 +60,7 @@ services:
       - ${DIR_CONSUME}:/usr/src/paperless/consume
     environment:
       PAPERLESS_REDIS: redis://valkey:6379
+      PAPERLESS_DBENGINE: postgresql
       PAPERLESS_DBHOST: postgresql
       PAPERLESS_DBNAME: ${DB_NAME:-paperless}
       PAPERLESS_DBUSER: ${DB_USER:-paperless}
